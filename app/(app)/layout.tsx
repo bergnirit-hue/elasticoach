@@ -34,6 +34,12 @@ export default async function AppLayout({
               המתאמנים שלי
             </Link>
           )}
+          <Link href="/calendar" className="font-medium hover:underline">
+            לוח שנה
+          </Link>
+          <Link href="/settings" className="font-medium hover:underline">
+            הגדרות
+          </Link>
         </nav>
         <SignOutButton />
       </header>
