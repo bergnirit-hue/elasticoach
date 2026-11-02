@@ -1,0 +1,46 @@
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function ClientsPage() {
+  const supabase = await createClient();
+
+  // RLS only returns rows where the current user is the coach or the client.
+  // We render the people this user coaches.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: links } = await supabase
+    .from("coach_client")
+    .select("client_id, status, client:profiles!coach_client_client_id_fkey(display_name)")
+    .eq("coach_id", user!.id)
+    .eq("status", "active");
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h1 className="text-xl font-bold">המתאמנים שלי</h1>
+
+      {!links || links.length === 0 ? (
+        <p className="opacity-70">עדיין אין לך מתאמנים משויכים.</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {links.map((link) => {
+            const client = link.client as unknown as {
+              display_name: string | null;
+            } | null;
+            return (
+              <li key={link.client_id}>
+                <Link
+                  href={`/clients/${link.client_id}`}
+                  className="block rounded-lg border border-black/10 p-3 hover:bg-black/5"
+                >
+                  {client?.display_name ?? "מתאמן/ת"}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
