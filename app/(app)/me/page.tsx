@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, hebrewLongDate, isValidYmd, today } from "@/lib/date";
 import { DayTracker } from "./DayTracker";
+import { WorkoutList } from "./WorkoutList";
 
 export default async function DayPage({
   searchParams,
@@ -16,7 +17,7 @@ export default async function DayPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: settings }, { data: day }] =
+  const [{ data: profile }, { data: settings }, { data: day }, { data: workouts }] =
     await Promise.all([
       supabase.from("profiles").select("display_name").eq("id", user!.id).single(),
       supabase
@@ -30,6 +31,11 @@ export default async function DayPage({
         .eq("user_id", user!.id)
         .eq("date", date)
         .maybeSingle(),
+      supabase
+        .from("workouts")
+        .select("id, type, note, scheduled_time, done")
+        .eq("user_id", user!.id)
+        .eq("scheduled_date", date),
     ]);
 
   const isToday = date === today();
@@ -80,6 +86,16 @@ export default async function DayPage({
           journal: day?.journal ?? {},
         }}
       />
+
+      <WorkoutList userId={user!.id} date={date} initial={workouts ?? []} />
+
+      {/* Menu — empty until a coach uploads one (EC-11) */}
+      <div className="rounded-xl border border-black/10 p-4 flex flex-col gap-3">
+        <h2 className="font-bold">התפריט שלי</h2>
+        <p className="text-sm opacity-70">
+          עדיין אין תפריט. ברגע שהמאמן יעלה תפריט, הוא יופיע כאן.
+        </p>
+      </div>
     </section>
   );
 }
