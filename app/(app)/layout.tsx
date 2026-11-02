@@ -34,6 +34,9 @@ export default async function AppLayout({
               המתאמנים שלי
             </Link>
           )}
+          <Link href="/settings" className="font-medium hover:underline">
+            הגדרות
+          </Link>
         </nav>
         <SignOutButton />
       </header>
