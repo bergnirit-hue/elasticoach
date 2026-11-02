@@ -2,7 +2,12 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, hebrewLongDate, isValidYmd, today } from "@/lib/date";
 import { DayTracker } from "./DayTracker";
+import { JournalPanel } from "./JournalPanel";
+import { MeasuresPanel } from "./MeasuresPanel";
+import { WaterPanel } from "./WaterPanel";
 import { WorkoutList } from "./WorkoutList";
+import { normalizeJournal } from "./journal";
+import { normalizeCircumferences, type Measure } from "./measures";
 
 export default async function DayPage({
   searchParams,
@@ -17,12 +22,18 @@ export default async function DayPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: profile }, { data: settings }, { data: day }, { data: workouts }] =
-    await Promise.all([
+  const [
+    { data: profile },
+    { data: settings },
+    { data: day },
+    { data: workouts },
+    { data: measureRows },
+    { data: measureForDay },
+  ] = await Promise.all([
       supabase.from("profiles").select("display_name").eq("id", user!.id).single(),
       supabase
         .from("user_settings")
-        .select("water_goal_ml, step_goal, goal_title")
+        .select("water_goal_ml, step_goal, goal_title, start_weight, goal_weight")
         .eq("user_id", user!.id)
         .maybeSingle(),
       supabase
@@ -36,7 +47,30 @@ export default async function DayPage({
         .select("id, type, note, scheduled_time, done")
         .eq("user_id", user!.id)
         .eq("scheduled_date", date),
+      supabase
+        .from("measures")
+        .select("date, weight, body_fat_pct, muscle_pct, circumferences")
+        .eq("user_id", user!.id)
+        .order("date", { ascending: false })
+        .limit(24),
+      supabase
+        .from("measures")
+        .select("date, weight, body_fat_pct, muscle_pct, circumferences")
+        .eq("user_id", user!.id)
+        .eq("date", date)
+        .maybeSingle(),
     ]);
+
+  const toMeasure = (m: NonNullable<typeof measureForDay>): Measure => ({
+    date: m.date,
+    weight: m.weight,
+    body_fat_pct: m.body_fat_pct,
+    muscle_pct: m.muscle_pct,
+    circumferences: normalizeCircumferences(m.circumferences),
+  });
+  const history = (measureRows ?? []).map(toMeasure);
+  // Queried separately so an old date outside the history window still pre-fills.
+  const currentMeasure = measureForDay ? toMeasure(measureForDay) : null;
 
   const isToday = date === today();
 
@@ -75,19 +109,36 @@ export default async function DayPage({
         </Link>
       </div>
 
-      <DayTracker
-        userId={user!.id}
+      <WaterPanel
+        key={`water-${date}`}
         date={date}
-        waterGoalMl={settings?.water_goal_ml ?? 2000}
+        goalMl={settings?.water_goal_ml ?? 2000}
+        initialMl={day?.water_ml ?? 0}
+      />
+
+      <DayTracker
+        key={`steps-${date}`}
+        date={date}
         stepGoal={settings?.step_goal ?? 8000}
-        initial={{
-          water_ml: day?.water_ml ?? 0,
-          steps: day?.steps ?? 0,
-          journal: day?.journal ?? {},
-        }}
+        initialSteps={day?.steps ?? 0}
+      />
+
+      <JournalPanel
+        key={`journal-${date}`}
+        date={date}
+        initial={normalizeJournal(day?.journal)}
       />
 
       <WorkoutList userId={user!.id} date={date} initial={workouts ?? []} />
+
+      <MeasuresPanel
+        key={`measures-${date}`}
+        date={date}
+        current={currentMeasure}
+        history={history}
+        startWeight={settings?.start_weight ?? null}
+        goalWeight={settings?.goal_weight ?? null}
+      />
 
       {/* Menu — empty until a coach uploads one (EC-11) */}
       <div className="rounded-xl border border-black/10 p-4 flex flex-col gap-3">
