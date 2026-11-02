@@ -170,14 +170,6 @@ export function DayTracker({
           </label>
         ))}
       </div>
-
-      {/* Menu — empty until a coach uploads one (EC-11) */}
-      <div className={card}>
-        <h2 className="font-bold">התפריט שלי</h2>
-        <p className="text-sm opacity-70">
-          עדיין אין תפריט. ברגע שהמאמן יעלה תפריט, הוא יופיע כאן.
-        </p>
-      </div>
     </div>
   );
 }
