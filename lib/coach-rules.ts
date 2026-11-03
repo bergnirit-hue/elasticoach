@@ -169,8 +169,14 @@ export function parseRulesForm(input: {
   const fields: CoachRuleFields = { ...EMPTY_RULES };
   fields.allowed_meal_types = types.length ? (types as MealType[]) : null;
 
+  // "none" is an explicit empty list: an override uses it to lift tags the
+  // coach default forbids (an empty field means "inherit" instead).
   const tags = parseTagList(str("forbidden_meal_tags"));
-  fields.forbidden_meal_tags = tags.length ? tags : null;
+  const noTags = input.get("forbidden_meal_tags_none") === "on";
+  if (noTags && tags.length) {
+    return { ok: false, error: "תגיות אסורות: לא ניתן לסמן ״ללא״ וגם להזין תגיות" };
+  }
+  fields.forbidden_meal_tags = noTags ? [] : tags.length ? tags : null;
 
   for (const { key, label, min, max } of NUMBER_FIELDS) {
     const raw = str(key);

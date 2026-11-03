@@ -46,7 +46,7 @@ export function RulesForm({ clientId, values, inherited }: Props) {
         <legend className="mb-1 text-sm font-medium">סוגי ארוחות מותרים</legend>
         <p className="text-xs opacity-70">
           {isOverride
-            ? "אם לא תסמנו כלום — יחולו הסוגים מברירת המחדל."
+            ? "אם לא תסמנו כלום — יחולו הסוגים מברירת המחדל. כדי להסיר הגבלה — סמנו את כל הסוגים."
             : "אם לא תסמנו כלום — כל הסוגים מותרים."}
         </p>
         {MEAL_TYPES.map((type) => (
@@ -83,6 +83,16 @@ export function RulesForm({ clientId, values, inherited }: Props) {
           </span>
         )}
       </label>
+      {isOverride && (
+        <label className="-mt-2 flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="forbidden_meal_tags_none"
+            defaultChecked={values.forbidden_meal_tags?.length === 0}
+          />
+          ללא תגיות אסורות (מבטל את ברירת המחדל)
+        </label>
+      )}
 
       <div className="grid grid-cols-3 gap-3">
         <label className={field}>

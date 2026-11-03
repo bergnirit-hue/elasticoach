@@ -156,6 +156,21 @@ describe("parseRulesForm", () => {
     });
   });
 
+  it("an explicit 'none' stores an empty tag list (lifts the default's tags)", () => {
+    const res = parseRulesForm(form([["forbidden_meal_tags_none", "on"]]));
+    expect(res.ok && res.fields.forbidden_meal_tags).toEqual([]);
+  });
+
+  it("rejects 'none' together with typed tags", () => {
+    const res = parseRulesForm(
+      form([
+        ["forbidden_meal_tags_none", "on"],
+        ["forbidden_meal_tags", "gluten"],
+      ]),
+    );
+    expect(res.ok).toBe(false);
+  });
+
   it("rejects unknown meal types", () => {
     expect(parseRulesForm(form([["allowed_meal_types", "brunch"]])).ok).toBe(false);
   });
