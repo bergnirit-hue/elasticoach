@@ -8,6 +8,8 @@ import { WaterPanel } from "./WaterPanel";
 import { WorkoutList } from "./WorkoutList";
 import { normalizeJournal } from "./journal";
 import { normalizeCircumferences, type Measure } from "./measures";
+import { loadDailyPlan } from "./menuData";
+import { DailyPlanCard } from "./DailyPlanCard";
 
 export default async function DayPage({
   searchParams,
@@ -29,6 +31,7 @@ export default async function DayPage({
     { data: workouts },
     { data: measureRows },
     { data: measureForDay },
+    planLoad,
   ] = await Promise.all([
       supabase.from("profiles").select("display_name").eq("id", user!.id).single(),
       supabase
@@ -59,6 +62,7 @@ export default async function DayPage({
         .eq("user_id", user!.id)
         .eq("date", date)
         .maybeSingle(),
+      loadDailyPlan(supabase, user!.id, date),
     ]);
 
   const toMeasure = (m: NonNullable<typeof measureForDay>): Measure => ({
@@ -140,13 +144,36 @@ export default async function DayPage({
         goalWeight={settings?.goal_weight ?? null}
       />
 
-      {/* Menu — empty until a coach uploads one (EC-11) */}
-      <div className="rounded-xl border border-black/10 p-4 flex flex-col gap-3">
-        <h2 className="font-bold">התפריט שלי</h2>
-        <p className="text-sm opacity-70">
-          עדיין אין תפריט. ברגע שהמאמן יעלה תפריט, הוא יופיע כאן.
-        </p>
-      </div>
+      {/* Daily plan + cross-menu swap (EC-13) */}
+      {!planLoad.hasCoach ? (
+        <div
+          style={{ boxShadow: "var(--shadow-card)" }}
+          className="flex flex-col gap-2 rounded-card border border-line bg-surface p-4"
+        >
+          <h2 className="font-display text-lg">התפריט שלי</h2>
+          <p className="text-sm text-ink-soft">
+            עדיין אין מאמן שמלווה אותך. ברגע שתתחברי למאמן והוא יפרסם תפריט,
+            הוא יופיע כאן.
+          </p>
+        </div>
+      ) : planLoad.plan.slots.length === 0 ? (
+        <div
+          style={{ boxShadow: "var(--shadow-card)" }}
+          className="flex flex-col gap-2 rounded-card border border-line bg-surface p-4"
+        >
+          <h2 className="font-display text-lg">התפריט שלי</h2>
+          <p className="text-sm text-ink-soft">
+            עדיין אין תפריט פעיל ליום הזה. ברגע שהמאמן יפרסם תפריט, הוא יופיע כאן.
+          </p>
+        </div>
+      ) : (
+        <DailyPlanCard
+          key={`menu-${date}`}
+          date={date}
+          slots={planLoad.plan.slots}
+          swapEnabled={planLoad.plan.swapEnabled}
+        />
+      )}
     </section>
   );
 }

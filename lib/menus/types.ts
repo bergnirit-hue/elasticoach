@@ -33,6 +33,15 @@ export const MENU_POLICIES: readonly MenuPolicy[] = [
 
 export const DEFAULT_MENU_POLICY: MenuPolicy = "fixed";
 
+/** Hebrew labels for each meal type, for the client-facing daily plan (EC-13). */
+export const MEAL_TYPE_LABELS: Record<MealType, string> = {
+  breakfast: "ארוחת בוקר",
+  "lunch-carb": "צהריים · פחמימה",
+  "lunch-protein": "צהריים · חלבון",
+  dinner: "ארוחת ערב",
+  snack: "ארוחת ביניים",
+};
+
 /** A meal as stored in the library. Macros are optional. */
 export interface Meal {
   id: string;
