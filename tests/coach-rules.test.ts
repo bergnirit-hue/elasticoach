@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   EMPTY_RULES,
+  MEAL_TYPES,
   isMealAllowed,
   parseRulesForm,
   parseTagList,
@@ -97,6 +98,19 @@ describe("isMealAllowed", () => {
   it("blocks meal types outside the allowed list", () => {
     expect(isMealAllowed(r, { type: "dinner" })).toBe(false);
     expect(isMealAllowed(r, { type: "snack" })).toBe(true);
+  });
+
+  it("uses the meal_library enum ids (hyphenated lunch types)", () => {
+    const lunch = { ...EMPTY_RULES, allowed_meal_types: ["lunch-carb" as const] };
+    expect(isMealAllowed(lunch, { type: "lunch-carb" })).toBe(true);
+    expect(isMealAllowed(lunch, { type: "lunch-protein" })).toBe(false);
+    expect([...MEAL_TYPES]).toEqual([
+      "breakfast",
+      "lunch-carb",
+      "lunch-protein",
+      "dinner",
+      "snack",
+    ]);
   });
 
   it("blocks forbidden tags case-insensitively", () => {

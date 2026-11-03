@@ -10,9 +10,10 @@ create table if not exists public.coach_rules (
   coach_id uuid not null references public.profiles (id) on delete cascade,
   client_id uuid references public.profiles (id) on delete cascade,
 
-  -- Meal restrictions. Meal types match the meal library types
-  -- (breakfast, lunch_carb, lunch_protein, dinner, snack). null = no restriction.
-  allowed_meal_types text[],
+  -- Meal restrictions. Typed with the same enum as meal_library.type (0003:
+  -- breakfast, lunch-carb, lunch-protein, dinner, snack), so Postgres enforces
+  -- the values. null = no restriction.
+  allowed_meal_types public.meal_type[],
   -- Tags a meal must NOT carry to be suggested. Tag vocabulary is defined with
   -- the meal library; matched case-insensitively in code.
   forbidden_meal_tags text[],
@@ -30,10 +31,6 @@ create table if not exists public.coach_rules (
   updated_at timestamptz not null default now(),
 
   check (client_id is null or coach_id <> client_id),
-  check (
-    allowed_meal_types is null
-    or allowed_meal_types <@ array['breakfast', 'lunch_carb', 'lunch_protein', 'dinner', 'snack']::text[]
-  ),
   check (water_goal_ml is null or water_goal_ml between 0 and 20000),
   check (protein_goal_g is null or protein_goal_g between 0 and 1000),
   check (weekly_workout_goal is null or weekly_workout_goal between 0 and 21),
