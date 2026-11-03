@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   EMPTY_RULES,
+  MEAL_TYPES,
   isMealAllowed,
   parseRulesForm,
   parseTagList,
@@ -99,6 +100,19 @@ describe("isMealAllowed", () => {
     expect(isMealAllowed(r, { type: "snack" })).toBe(true);
   });
 
+  it("uses the meal_library enum ids (hyphenated lunch types)", () => {
+    const lunch = { ...EMPTY_RULES, allowed_meal_types: ["lunch-carb" as const] };
+    expect(isMealAllowed(lunch, { type: "lunch-carb" })).toBe(true);
+    expect(isMealAllowed(lunch, { type: "lunch-protein" })).toBe(false);
+    expect([...MEAL_TYPES]).toEqual([
+      "breakfast",
+      "lunch-carb",
+      "lunch-protein",
+      "dinner",
+      "snack",
+    ]);
+  });
+
   it("blocks forbidden tags case-insensitively", () => {
     expect(isMealAllowed(r, { type: "snack", tags: [" gluten "] })).toBe(false);
     expect(isMealAllowed(r, { type: "snack", tags: ["vegan"] })).toBe(true);
@@ -140,6 +154,21 @@ describe("parseRulesForm", () => {
         notes: "hi",
       },
     });
+  });
+
+  it("an explicit 'none' stores an empty tag list (lifts the default's tags)", () => {
+    const res = parseRulesForm(form([["forbidden_meal_tags_none", "on"]]));
+    expect(res.ok && res.fields.forbidden_meal_tags).toEqual([]);
+  });
+
+  it("rejects 'none' together with typed tags", () => {
+    const res = parseRulesForm(
+      form([
+        ["forbidden_meal_tags_none", "on"],
+        ["forbidden_meal_tags", "gluten"],
+      ]),
+    );
+    expect(res.ok).toBe(false);
   });
 
   it("rejects unknown meal types", () => {

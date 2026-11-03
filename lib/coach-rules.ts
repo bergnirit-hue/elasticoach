@@ -8,8 +8,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const MEAL_TYPES = [
   "breakfast",
-  "lunch_carb",
-  "lunch_protein",
+  "lunch-carb",
+  "lunch-protein",
   "dinner",
   "snack",
 ] as const;
@@ -17,8 +17,8 @@ export type MealType = (typeof MEAL_TYPES)[number];
 
 export const MEAL_TYPE_LABELS: Record<MealType, string> = {
   breakfast: "ארוחת בוקר",
-  lunch_carb: "ארוחת צהריים — פחמימה",
-  lunch_protein: "ארוחת צהריים — חלבון",
+  "lunch-carb": "ארוחת צהריים — פחמימה",
+  "lunch-protein": "ארוחת צהריים — חלבון",
   dinner: "ארוחת ערב",
   snack: "נשנוש",
 };
@@ -169,8 +169,14 @@ export function parseRulesForm(input: {
   const fields: CoachRuleFields = { ...EMPTY_RULES };
   fields.allowed_meal_types = types.length ? (types as MealType[]) : null;
 
+  // "none" is an explicit empty list: an override uses it to lift tags the
+  // coach default forbids (an empty field means "inherit" instead).
   const tags = parseTagList(str("forbidden_meal_tags"));
-  fields.forbidden_meal_tags = tags.length ? tags : null;
+  const noTags = input.get("forbidden_meal_tags_none") === "on";
+  if (noTags && tags.length) {
+    return { ok: false, error: "תגיות אסורות: לא ניתן לסמן ״ללא״ וגם להזין תגיות" };
+  }
+  fields.forbidden_meal_tags = noTags ? [] : tags.length ? tags : null;
 
   for (const { key, label, min, max } of NUMBER_FIELDS) {
     const raw = str(key);
