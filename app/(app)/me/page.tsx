@@ -10,6 +10,7 @@ import { normalizeJournal } from "./journal";
 import { normalizeCircumferences, type Measure } from "./measures";
 import { loadDailyPlan } from "./menuData";
 import { DailyPlanCard } from "./DailyPlanCard";
+import { BEFORE_PHOTOS_BUCKET } from "./photo";
 
 export default async function DayPage({
   searchParams,
@@ -58,14 +59,21 @@ export default async function DayPage({
         .limit(24),
       supabase
         .from("measures")
-        .select("date, weight, body_fat_pct, muscle_pct, circumferences")
+        .select("date, weight, body_fat_pct, muscle_pct, circumferences, photo_path")
         .eq("user_id", user!.id)
         .eq("date", date)
         .maybeSingle(),
       loadDailyPlan(supabase, user!.id, date),
     ]);
 
-  const toMeasure = (m: NonNullable<typeof measureForDay>): Measure => ({
+  type MeasureRow = {
+    date: string;
+    weight: number | null;
+    body_fat_pct: number | null;
+    muscle_pct: number | null;
+    circumferences: unknown;
+  };
+  const toMeasure = (m: MeasureRow): Measure => ({
     date: m.date,
     weight: m.weight,
     body_fat_pct: m.body_fat_pct,
@@ -75,6 +83,16 @@ export default async function DayPage({
   const history = (measureRows ?? []).map(toMeasure);
   // Queried separately so an old date outside the history window still pre-fills.
   const currentMeasure = measureForDay ? toMeasure(measureForDay) : null;
+
+  // Private "before" photo: resolve a short-lived signed URL server-side
+  // (bucket is not public). Owner-only — coach access is an open question (EC-7).
+  let photoUrl: string | null = null;
+  if (measureForDay?.photo_path) {
+    const { data: signed } = await supabase.storage
+      .from(BEFORE_PHOTOS_BUCKET)
+      .createSignedUrl(measureForDay.photo_path, 60 * 60);
+    photoUrl = signed?.signedUrl ?? null;
+  }
 
   const isToday = date === today();
 
@@ -142,6 +160,7 @@ export default async function DayPage({
         history={history}
         startWeight={settings?.start_weight ?? null}
         goalWeight={settings?.goal_weight ?? null}
+        photoUrl={photoUrl}
       />
 
       {/* Daily plan + cross-menu swap (EC-13) */}

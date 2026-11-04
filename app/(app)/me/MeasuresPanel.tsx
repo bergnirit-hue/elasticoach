@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { deleteMeasure, saveMeasure } from "./actions";
+import { useRef, useState, useTransition } from "react";
+import {
+  deleteMeasure,
+  removeMeasurePhoto,
+  saveMeasure,
+  uploadMeasurePhoto,
+} from "./actions";
 import { hebrewLongDate } from "@/lib/date";
 import {
   CIRCUMFERENCES,
@@ -10,6 +15,7 @@ import {
   type CircumferenceKey,
   type Measure,
 } from "./measures";
+import { validatePhotoFile } from "./photo";
 
 const card = "rounded-xl border border-black/10 p-4 flex flex-col gap-3";
 const field =
@@ -23,6 +29,7 @@ export function MeasuresPanel({
   history,
   startWeight,
   goalWeight,
+  photoUrl,
 }: {
   date: string;
   /** The measurement already saved for `date`, if any. */
@@ -31,6 +38,8 @@ export function MeasuresPanel({
   history: Measure[];
   startWeight: number | null;
   goalWeight: number | null;
+  /** Short-lived signed URL for the "before" photo of `date`, if any. */
+  photoUrl: string | null;
 }) {
   const [weight, setWeight] = useState(str(current?.weight));
   const [fat, setFat] = useState(str(current?.body_fat_pct));
@@ -45,6 +54,7 @@ export function MeasuresPanel({
     null,
   );
   const [pending, startTransition] = useTransition();
+  const fileRef = useRef<HTMLInputElement>(null);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,6 +75,37 @@ export function MeasuresPanel({
     if (!window.confirm("למחוק את המדידה?")) return;
     startTransition(async () => {
       const res = await deleteMeasure(d);
+      if (!res.ok) setMessage({ ok: false, text: res.error });
+    });
+  }
+
+  function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMessage(null);
+    const valid = validatePhotoFile({ type: file.type, size: file.size });
+    if (!valid.ok) {
+      setMessage({ ok: false, text: valid.error });
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+    const data = new FormData();
+    data.set("date", date);
+    data.set("file", file);
+    startTransition(async () => {
+      const res = await uploadMeasurePhoto(data);
+      setMessage(
+        res.ok ? { ok: true, text: "התמונה הועלתה" } : { ok: false, text: res.error },
+      );
+      if (fileRef.current) fileRef.current.value = "";
+    });
+  }
+
+  function removePhoto() {
+    if (!window.confirm("להסיר את תמונת ה״לפני״?")) return;
+    setMessage(null);
+    startTransition(async () => {
+      const res = await removeMeasurePhoto(date);
       if (!res.ok) setMessage({ ok: false, text: res.error });
     });
   }
@@ -141,9 +182,6 @@ export function MeasuresPanel({
           </div>
         </fieldset>
 
-        {/* TODO(EC-17): "before" photo upload — needs a private storage bucket
-            (none exists in the migrations yet); `measures.photo_path` is ready. */}
-
         <div className="flex items-center gap-3">
           <button
             type="submit"
@@ -162,6 +200,42 @@ export function MeasuresPanel({
           )}
         </div>
       </form>
+
+      {/* "before" photo (EC-41): private, owner-only. Coach viewing is an open
+          product/legal question (EC-7) and is intentionally not wired. */}
+      <div className="flex flex-col gap-2 border-t border-black/10 pt-3">
+        <h3 className="text-sm font-medium">תמונת ״לפני״ (לא חובה)</h3>
+        <p className="text-xs opacity-60">
+          פרטית — נראית רק לך. עד 5MB, בפורמט JPG, PNG או WEBP.
+        </p>
+        {photoUrl && (
+          <div className="flex flex-col items-start gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photoUrl}
+              alt={`תמונת לפני מ${hebrewLongDate(date)}`}
+              className="max-h-48 w-auto rounded-lg border border-black/10 object-contain"
+            />
+            <button
+              type="button"
+              onClick={removePhoto}
+              disabled={pending}
+              className="rounded-lg border border-black/15 px-2 py-1 text-xs disabled:opacity-50"
+            >
+              הסרת התמונה
+            </button>
+          </div>
+        )}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={onPhotoChange}
+          disabled={pending}
+          aria-label="העלאת תמונת לפני"
+          className="text-sm file:me-2 file:rounded-lg file:border file:border-black/15 file:bg-background file:px-3 file:py-1.5 file:text-sm"
+        />
+      </div>
 
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">היסטוריה</h3>
