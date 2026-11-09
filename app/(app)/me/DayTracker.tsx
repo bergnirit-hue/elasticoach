@@ -10,8 +10,9 @@ type Props = {
   initialSteps: number;
 };
 
-const card = "rounded-xl border border-black/10 p-4 flex flex-col gap-3";
-const bar = "h-2.5 rounded-full bg-black/10 overflow-hidden";
+const card =
+  "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
+const bar = "h-2.5 rounded-pill bg-surface-2 overflow-hidden";
 
 /** Steps. Water lives in WaterPanel and the journal in JournalPanel. */
 export function DayTracker({ date, stepGoal, initialSteps }: Props) {
@@ -30,7 +31,7 @@ export function DayTracker({ date, stepGoal, initialSteps }: Props) {
     <div className={card}>
       <div className="flex items-baseline justify-between">
         <h2 className="font-bold">צעדים</h2>
-        <span className="text-sm tabular-nums opacity-70">
+        <span className="text-sm tabular-nums text-ink-soft">
           יעד {stepGoal.toLocaleString("he-IL")}
         </span>
       </div>
@@ -44,11 +45,11 @@ export function DayTracker({ date, stepGoal, initialSteps }: Props) {
         onChange={(e) => changeSteps(e.target.value)}
         placeholder="מהשעון או מהטלפון"
         aria-label="צעדים"
-        className="rounded-lg border border-black/15 bg-background p-2.5 text-start"
+        className="rounded-sm border border-line bg-background p-2.5 text-start"
       />
       <div className={bar}>
         <i
-          className="block h-full rounded-full bg-emerald-600"
+          className="block h-full rounded-pill bg-good"
           style={{ width: `${stepPct}%` }}
         />
       </div>

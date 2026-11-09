@@ -3,7 +3,7 @@ import { saveSettings } from "./actions";
 
 const field = "flex flex-col gap-1 text-sm";
 const input =
-  "rounded-lg border border-black/15 bg-background p-2.5 text-start";
+  "rounded-sm border border-line bg-background p-2.5 text-start";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -125,7 +125,7 @@ export default async function SettingsPage() {
 
         <button
           type="submit"
-          className="self-start rounded-lg bg-black px-5 py-2.5 font-medium text-white"
+          className="btn-brand self-start px-5 py-2.5"
         >
           שמירה
         </button>

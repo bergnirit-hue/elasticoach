@@ -32,20 +32,20 @@ export default async function ClientsPage() {
       <div className="flex items-baseline justify-between gap-3">
         <h1 className="text-xl font-bold">המתאמנים שלי</h1>
         {/* Cheap "switch to my tracking" affordance inside the coach area. */}
-        <Link href="/me" className="text-sm opacity-70 hover:underline">
+        <Link href="/me" className="text-sm text-ink-soft hover:underline">
           למעקב שלי ←
         </Link>
       </div>
 
       {active.length === 0 ? (
-        <p className="opacity-70">עדיין אין לך מתאמנים משויכים.</p>
+        <p className="text-ink-soft">עדיין אין לך מתאמנים משויכים.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {active.map((link) => (
             <li key={link.client_id}>
               <Link
                 href={`/clients/${link.client_id}`}
-                className="block rounded-lg border border-black/10 p-3 hover:bg-black/5"
+                className="block rounded-card border border-line bg-surface shadow-card p-3 hover:bg-surface-2"
               >
                 {link.client?.display_name ?? "מתאמן/ת"}
               </Link>
@@ -56,12 +56,12 @@ export default async function ClientsPage() {
 
       {invited.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium opacity-70">ממתינים לאישור</h2>
+          <h2 className="text-sm font-medium text-ink-soft">ממתינים לאישור</h2>
           <ul className="flex flex-col gap-2">
             {invited.map((link) => (
               <li
                 key={link.client_id}
-                className="rounded-lg border border-dashed border-black/15 p-3 text-sm opacity-70"
+                className="rounded-card border border-dashed border-line p-3 text-sm text-ink-soft"
               >
                 {link.client?.display_name ?? "מתאמן/ת"} · הזמנה נשלחה
               </li>

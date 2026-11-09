@@ -120,6 +120,22 @@
   --font-display: var(--font-secular), "Secular One", var(--font-assistant), system-ui, sans-serif;
 }
 
+/* ===== Components ===== */
+@layer components {
+  /* Primary action — the single place the brand gradient appears as a fill.
+     White-label: re-skins automatically with --brand / --brand-2. */
+  .btn-brand {
+    background: var(--brand-grad);
+    color: var(--on-brand);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  .btn-brand:hover { filter: brightness(1.06); }
+  .btn-brand:active { transform: translateY(1px); }
+  .btn-brand:disabled { opacity: 0.5; filter: none; transform: none; }
+}
+
 /* ===== Base ===== */
 body {
   background: var(--bg);

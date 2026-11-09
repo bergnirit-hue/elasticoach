@@ -124,7 +124,7 @@ export default async function DayPage({
         {/* RTL: the next day sits on the left, the previous day on the right. */}
         <Link
           href={`/me?d=${addDays(date, 1)}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="יום הבא"
         >
           ‹
@@ -134,14 +134,14 @@ export default async function DayPage({
             {isToday ? "היום" : hebrewLongDate(date)}
           </div>
           {!isToday && (
-            <Link href="/me" className="text-xs opacity-60 hover:underline">
+            <Link href="/me" className="text-xs text-brand hover:underline">
               חזרה להיום
             </Link>
           )}
         </div>
         <Link
           href={`/me?d=${addDays(date, -1)}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="יום קודם"
         >
           ›

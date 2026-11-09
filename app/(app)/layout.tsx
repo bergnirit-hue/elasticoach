@@ -31,7 +31,7 @@ export default async function AppLayout({
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col">
       <CoachBrandStyle brand={brand} brand2={brand2} />
-      <header className="flex items-center justify-between border-b border-black/10 p-4">
+      <header className="flex items-center justify-between border-b border-line p-4">
         <nav className="flex gap-4 text-sm">
           <Link href="/me" className="font-medium hover:underline">
             המעקב שלי
