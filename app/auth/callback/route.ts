@@ -48,6 +48,9 @@ export async function GET(request: Request) {
     if (!error) {
       return response;
     }
+    // Surface the cause in server logs — a silent failure here is what made
+    // EC-46 invisible until auth.sessions had to be inspected by hand.
+    console.error("[auth/callback] exchangeCodeForSession failed:", error.message);
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth`);
