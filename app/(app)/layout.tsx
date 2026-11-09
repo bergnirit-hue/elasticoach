@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isCoach, type Relationship } from "@/lib/roles";
 import { resolveBrandFromEnv } from "@/lib/theme/brand";
 import { CoachBrandStyle } from "./CoachBrandStyle";
+import { AppNav } from "./_components/AppNav";
 import { SignOutButton } from "./_components/SignOutButton";
 
 export default async function AppLayout({
@@ -31,27 +32,20 @@ export default async function AppLayout({
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col">
       <CoachBrandStyle brand={brand} brand2={brand2} />
-      <header className="flex items-center justify-between border-b border-line p-4">
-        <nav className="flex gap-4 text-sm">
-          <Link href="/me" className="font-medium hover:underline">
-            המעקב שלי
-          </Link>
-          {userIsCoach && (
-            <Link href="/clients" className="font-medium hover:underline">
-              המתאמנים שלי
-            </Link>
-          )}
-          <Link href="/calendar" className="font-medium hover:underline">
-            לוח שנה
-          </Link>
-          <Link href="/settings" className="font-medium hover:underline">
-            הגדרות
-          </Link>
-        </nav>
-        <SignOutButton />
+      <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line bg-bg/90 p-4 backdrop-blur">
+        <Link
+          href="/me"
+          className="bg-[image:var(--brand-grad)] bg-clip-text font-display text-lg text-transparent"
+        >
+          Elasticoach
+        </Link>
+        <div className="flex items-center gap-3">
+          <AppNav isCoach={userIsCoach} />
+          <SignOutButton />
+        </div>
       </header>
 
-      <main className="flex-1 p-4">{children}</main>
+      <main className="flex-1 p-4 pb-24 sm:pb-4">{children}</main>
     </div>
   );
 }
