@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isCoach, type Relationship } from "@/lib/roles";
+import { resolveBrandFromEnv } from "@/lib/theme/brand";
+import { CoachBrandStyle } from "./CoachBrandStyle";
 import { SignOutButton } from "./_components/SignOutButton";
 
 export default async function AppLayout({
@@ -22,8 +24,13 @@ export default async function AppLayout({
 
   const userIsCoach = isCoach((relationships ?? []) as Relationship[], user.id);
 
+  // White-label: override --brand / --brand-2 for this coach; derived tokens
+  // in globals.css re-resolve from them. Falls back to platform defaults.
+  const { brand, brand2 } = resolveBrandFromEnv();
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col">
+      <CoachBrandStyle brand={brand} brand2={brand2} />
       <header className="flex items-center justify-between border-b border-black/10 p-4">
         <nav className="flex gap-4 text-sm">
           <Link href="/me" className="font-medium hover:underline">
