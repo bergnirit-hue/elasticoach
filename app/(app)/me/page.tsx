@@ -11,6 +11,8 @@ import { normalizeCircumferences, type Measure } from "./measures";
 import { loadDailyPlan } from "./menuData";
 import { DailyPlanCard } from "./DailyPlanCard";
 import { BEFORE_PHOTOS_BUCKET } from "./photo";
+import { PendingInvites } from "./PendingInvites";
+import { toPendingInvite, type InviteRow } from "@/lib/invites";
 
 export default async function DayPage({
   searchParams,
@@ -32,6 +34,7 @@ export default async function DayPage({
     { data: workouts },
     { data: measureRows },
     { data: measureForDay },
+    { data: inviteRows },
     planLoad,
   ] = await Promise.all([
       supabase.from("profiles").select("display_name").eq("id", user!.id).single(),
@@ -63,8 +66,20 @@ export default async function DayPage({
         .eq("user_id", user!.id)
         .eq("date", date)
         .maybeSingle(),
+      // EC-45: pending coach invites awaiting this client's consent.
+      supabase
+        .from("coach_client")
+        .select(
+          "id, coach_id, coach:profiles!coach_client_coach_id_fkey(display_name)",
+        )
+        .eq("client_id", user!.id)
+        .eq("status", "invited"),
       loadDailyPlan(supabase, user!.id, date),
     ]);
+
+  const invites = ((inviteRows ?? []) as unknown as InviteRow[]).map(
+    toPendingInvite,
+  );
 
   type MeasureRow = {
     date: string;
@@ -102,6 +117,8 @@ export default async function DayPage({
         <p className="text-sm opacity-70">שלום {profile?.display_name ?? ""}</p>
         <h1 className="text-xl font-bold">{settings?.goal_title ?? "היום שלי"}</h1>
       </header>
+
+      <PendingInvites invites={invites} />
 
       <div className="flex items-center justify-between">
         {/* RTL: the next day sits on the left, the previous day on the right. */}
