@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LinkClientForm } from "./LinkClientForm";
+import { EmptyState } from "../_components/EmptyState";
+import { ClientsIcon } from "../_components/icons";
 
 type LinkRow = {
   client_id: string;
@@ -38,7 +40,11 @@ export default async function ClientsPage() {
       </div>
 
       {active.length === 0 ? (
-        <p className="text-ink-soft">עדיין אין לך מתאמנים משויכים.</p>
+        <EmptyState
+          icon={<ClientsIcon className="h-6 w-6" />}
+          title="עדיין אין לך מתאמנים משויכים"
+          description="מתאמנים שישויכו אליך יופיעו כאן."
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {active.map((link) => (
