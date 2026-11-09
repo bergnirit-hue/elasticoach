@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { EmptyState } from "../_components/EmptyState";
+import { ClientsIcon } from "../_components/icons";
 
 export default async function ClientsPage() {
   const supabase = await createClient();
@@ -21,7 +23,11 @@ export default async function ClientsPage() {
       <h1 className="text-xl font-bold">המתאמנים שלי</h1>
 
       {!links || links.length === 0 ? (
-        <p className="opacity-70">עדיין אין לך מתאמנים משויכים.</p>
+        <EmptyState
+          icon={<ClientsIcon className="h-6 w-6" />}
+          title="עדיין אין לך מתאמנים משויכים"
+          description="מתאמנים שישויכו אליך יופיעו כאן."
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {links.map((link) => {

@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { addDays, hebrewLongDate, isValidYmd, today } from "@/lib/date";
 import { DayTracker } from "./DayTracker";
 import { WorkoutList } from "./WorkoutList";
+import { EmptyState } from "../_components/EmptyState";
+import { PlateIcon } from "../_components/icons";
 
 export default async function DayPage({
   searchParams,
@@ -92,9 +94,11 @@ export default async function DayPage({
       {/* Menu — empty until a coach uploads one (EC-11) */}
       <div className="rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3">
         <h2 className="font-bold">התפריט שלי</h2>
-        <p className="text-sm opacity-70">
-          עדיין אין תפריט. ברגע שהמאמן יעלה תפריט, הוא יופיע כאן.
-        </p>
+        <EmptyState
+          icon={<PlateIcon className="h-6 w-6" />}
+          title="עדיין אין תפריט"
+          description="ברגע שהמאמן יעלה תפריט, הוא יופיע כאן."
+        />
       </div>
     </section>
   );

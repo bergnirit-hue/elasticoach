@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { EmptyState } from "../../_components/EmptyState";
+import { ClipboardIcon } from "../../_components/icons";
 
 export default async function ClientDayPage({
   params,
@@ -39,9 +41,13 @@ export default async function ClientDayPage({
       <h1 className="text-xl font-bold">
         {client?.display_name ?? "מתאמן/ת"}
       </h1>
-      <p className="opacity-80">
-        כאן יופיע היום של המתאמן/ת (תפריט, דיווחים ומדדים) בהמשך.
-      </p>
+      <div className="rounded-card border border-line bg-surface shadow-card p-4">
+        <EmptyState
+          icon={<ClipboardIcon className="h-6 w-6" />}
+          title="עדיין אין מה להציג"
+          description="כאן יופיע היום של המתאמן/ת — תפריט, דיווחים ומדדים."
+        />
+      </div>
     </section>
   );
 }

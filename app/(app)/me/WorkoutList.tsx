@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { EmptyState } from "../_components/EmptyState";
+import { DumbbellIcon } from "../_components/icons";
 
 type Workout = {
   id: string;
@@ -73,7 +75,11 @@ export function WorkoutList({
       <h2 className="font-bold">אימונים</h2>
 
       {items.length === 0 ? (
-        <p className="text-sm opacity-70">אין אימון מתוכנן ליום הזה.</p>
+        <EmptyState
+          icon={<DumbbellIcon className="h-6 w-6" />}
+          title="אין אימון מתוכנן ליום הזה"
+          description="אפשר להוסיף אימון למטה."
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((w) => (
