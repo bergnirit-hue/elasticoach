@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { saveSettings } from "./actions";
 import { SaveButton } from "./SaveButton";
+import { WaterGoalField } from "./WaterGoalField";
 
 const field = "flex flex-col gap-1 text-sm";
 const input =
@@ -98,18 +99,8 @@ export default async function SettingsPage() {
 
         <div className={card}>
           <h2 className="font-bold">יעדים יומיים</h2>
-          <div className="grid grid-cols-3 gap-3">
-            <label className={field}>
-              יעד מים (מ״ל)
-              <input
-                name="water_goal_ml"
-                type="number"
-                step="50"
-                inputMode="numeric"
-                defaultValue={settings?.water_goal_ml ?? 2000}
-                className={input}
-              />
-            </label>
+          <WaterGoalField defaultMl={settings?.water_goal_ml ?? 2000} />
+          <div className="grid grid-cols-2 gap-3">
             <label className={field}>
               אימונים בשבוע
               <input
