@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Ring } from "../_components/Ring";
 
 type Journal = Record<string, string>;
 
@@ -23,7 +24,6 @@ const JOURNAL_SLOTS: { key: string; label: string }[] = [
 
 const card =
   "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
-const bar = "h-2.5 rounded-pill bg-surface-2 overflow-hidden";
 const stepper =
   "rounded-sm border border-line px-3 py-1.5 text-sm hover:bg-surface-2";
 
@@ -90,68 +90,86 @@ export function DayTracker({
 
       {/* Water */}
       <div className={card}>
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-bold">מים</h2>
-          <span className="text-sm tabular-nums">
-            {(waterMl / 1000).toFixed(2)} / {(waterGoalMl / 1000).toFixed(1)} ליטר
-          </span>
-        </div>
-        <div className={bar}>
-          <i
-            className="block h-full rounded-pill bg-water"
-            style={{ width: `${waterPct}%` }}
-          />
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => changeWater(-250)}
-            className={stepper}
-            aria-label="הפחתת כוס"
+        <div className="flex items-center gap-4">
+          <Ring
+            value={waterMl}
+            goal={waterGoalMl}
+            color="var(--water)"
+            label={`מים: ${waterPct}% מהיעד`}
           >
-            −
-          </button>
-          <button
-            type="button"
-            onClick={() => changeWater(250)}
-            className={stepper}
-          >
-            + כוס
-          </button>
-          <button
-            type="button"
-            onClick={() => changeWater(750)}
-            className={stepper}
-          >
-            + בקבוק
-          </button>
+            <span className="font-display text-lg leading-none tabular-nums">
+              {(waterMl / 1000).toFixed(1)}
+            </span>
+            <span className="mt-0.5 text-[10px] text-ink-soft">ליטר</span>
+          </Ring>
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <div className="flex items-baseline justify-between">
+              <h2 className="font-bold">מים</h2>
+              <span className="text-sm tabular-nums text-ink-soft">
+                יעד {(waterGoalMl / 1000).toFixed(1)} ליטר
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => changeWater(-250)}
+                className={stepper}
+                aria-label="הפחתת כוס"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                onClick={() => changeWater(250)}
+                className={stepper}
+              >
+                + כוס
+              </button>
+              <button
+                type="button"
+                onClick={() => changeWater(750)}
+                className={stepper}
+              >
+                + בקבוק
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Steps */}
       <div className={card}>
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-bold">צעדים</h2>
-          <span className="text-sm tabular-nums opacity-70">
-            יעד {stepGoal.toLocaleString("he-IL")}
-          </span>
-        </div>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          step={100}
-          dir="ltr"
-          value={steps || ""}
-          onChange={(e) => changeSteps(e.target.value)}
-          placeholder="מהשעון או מהטלפון"
-          className="rounded-sm border border-line bg-background p-2.5 text-start"
-        />
-        <div className={bar}>
-          <i
-            className="block h-full rounded-pill bg-good"
-            style={{ width: `${stepPct}%` }}
-          />
+        <div className="flex items-center gap-4">
+          <Ring
+            value={steps}
+            goal={stepGoal}
+            color="var(--good)"
+            label={`צעדים: ${stepPct}% מהיעד`}
+          >
+            <span className="font-display text-base leading-none tabular-nums">
+              {steps.toLocaleString("he-IL")}
+            </span>
+            <span className="mt-0.5 text-[10px] text-ink-soft">צעדים</span>
+          </Ring>
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <div className="flex items-baseline justify-between">
+              <h2 className="font-bold">צעדים</h2>
+              <span className="text-sm tabular-nums text-ink-soft">
+                יעד {stepGoal.toLocaleString("he-IL")}
+              </span>
+            </div>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={100}
+              dir="ltr"
+              value={steps || ""}
+              onChange={(e) => changeSteps(e.target.value)}
+              placeholder="מהשעון או מהטלפון"
+              className="rounded-sm border border-line bg-background p-2.5 text-start"
+            />
+          </div>
         </div>
       </div>
 
