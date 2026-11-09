@@ -51,7 +51,7 @@ export default async function DayPage({
         {/* RTL: the next day sits on the left, the previous day on the right. */}
         <Link
           href={`/me?d=${addDays(date, 1)}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="יום הבא"
         >
           ‹
@@ -61,14 +61,14 @@ export default async function DayPage({
             {isToday ? "היום" : hebrewLongDate(date)}
           </div>
           {!isToday && (
-            <Link href="/me" className="text-xs opacity-60 hover:underline">
+            <Link href="/me" className="text-xs text-brand hover:underline">
               חזרה להיום
             </Link>
           )}
         </div>
         <Link
           href={`/me?d=${addDays(date, -1)}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="יום קודם"
         >
           ›
@@ -90,7 +90,7 @@ export default async function DayPage({
       <WorkoutList userId={user!.id} date={date} initial={workouts ?? []} />
 
       {/* Menu — empty until a coach uploads one (EC-11) */}
-      <div className="rounded-xl border border-black/10 p-4 flex flex-col gap-3">
+      <div className="rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3">
         <h2 className="font-bold">התפריט שלי</h2>
         <p className="text-sm opacity-70">
           עדיין אין תפריט. ברגע שהמאמן יעלה תפריט, הוא יופיע כאן.

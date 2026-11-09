@@ -21,8 +21,11 @@ const JOURNAL_SLOTS: { key: string; label: string }[] = [
   { key: "notes", label: "תחושות, רעב ושובע" },
 ];
 
-const card = "rounded-xl border border-black/10 p-4 flex flex-col gap-3";
-const bar = "h-2.5 rounded-full bg-black/10 overflow-hidden";
+const card =
+  "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
+const bar = "h-2.5 rounded-pill bg-surface-2 overflow-hidden";
+const stepper =
+  "rounded-sm border border-line px-3 py-1.5 text-sm hover:bg-surface-2";
 
 export function DayTracker({
   userId,
@@ -95,7 +98,7 @@ export function DayTracker({
         </div>
         <div className={bar}>
           <i
-            className="block h-full rounded-full bg-sky-600"
+            className="block h-full rounded-pill bg-water"
             style={{ width: `${waterPct}%` }}
           />
         </div>
@@ -103,7 +106,7 @@ export function DayTracker({
           <button
             type="button"
             onClick={() => changeWater(-250)}
-            className="rounded-lg border border-black/15 px-3 py-1.5 text-sm"
+            className={stepper}
             aria-label="הפחתת כוס"
           >
             −
@@ -111,14 +114,14 @@ export function DayTracker({
           <button
             type="button"
             onClick={() => changeWater(250)}
-            className="rounded-lg border border-black/15 px-3 py-1.5 text-sm"
+            className={stepper}
           >
             + כוס
           </button>
           <button
             type="button"
             onClick={() => changeWater(750)}
-            className="rounded-lg border border-black/15 px-3 py-1.5 text-sm"
+            className={stepper}
           >
             + בקבוק
           </button>
@@ -142,11 +145,11 @@ export function DayTracker({
           value={steps || ""}
           onChange={(e) => changeSteps(e.target.value)}
           placeholder="מהשעון או מהטלפון"
-          className="rounded-lg border border-black/15 bg-background p-2.5 text-start"
+          className="rounded-sm border border-line bg-background p-2.5 text-start"
         />
         <div className={bar}>
           <i
-            className="block h-full rounded-full bg-emerald-600"
+            className="block h-full rounded-pill bg-good"
             style={{ width: `${stepPct}%` }}
           />
         </div>
@@ -165,7 +168,7 @@ export function DayTracker({
               rows={2}
               value={journal[slot.key] ?? ""}
               onChange={(e) => changeJournal(slot.key, e.target.value)}
-              className="rounded-lg border border-black/15 bg-background p-2.5 text-start"
+              className="rounded-sm border border-line bg-background p-2.5 text-start"
             />
           </label>
         ))}

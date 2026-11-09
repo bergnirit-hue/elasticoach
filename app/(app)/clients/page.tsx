@@ -32,7 +32,7 @@ export default async function ClientsPage() {
               <li key={link.client_id}>
                 <Link
                   href={`/clients/${link.client_id}`}
-                  className="block rounded-lg border border-black/10 p-3 hover:bg-black/5"
+                  className="block rounded-card border border-line bg-surface shadow-card p-3 hover:bg-surface-2"
                 >
                   {client?.display_name ?? "מתאמן/ת"}
                 </Link>
