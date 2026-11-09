@@ -43,3 +43,6 @@ Thumbs.db
 # Misc
 *.tsbuildinfo
 .turbo/
+
+# Local staging credentials (generated demo passwords) — never commit
+.env.staging.local
