@@ -229,13 +229,15 @@ describe("menuDraftFromForm", () => {
     expect(d.appliesTo).toEqual({ kind: "client", clientId: "client-2" });
   });
 
-  it("collects inline new meals and drops fully-empty rows", () => {
+  it("collects inline new meals and drops blank-text rows", () => {
+    // Mirrors the real form: every row always emits a hidden new_meal_type,
+    // so a dropped row is one whose TEXT is blank (not its type).
     const d = menuDraftFromForm(
       form([
         ["new_meal_type", "breakfast"],
         ["new_meal_text", "חביתה"],
         ["new_meal_url", "https://ex.com"],
-        ["new_meal_type", ""],
+        ["new_meal_type", "dinner"],
         ["new_meal_text", "   "],
         ["new_meal_url", ""],
       ]),

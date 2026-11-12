@@ -16,11 +16,11 @@ export interface SaveMenuState {
 
 /** Postgres "column does not exist" — menu.client_id before migration 0010. */
 function isMissingClientColumn(error: { code?: string; message?: string }): boolean {
-  return (
-    error.code === "42703" ||
-    error.code === "PGRST204" ||
-    /client_id/.test(error.message ?? "")
-  );
+  // Match the schema-cache / undefined-column codes, and only a message that is
+  // specifically about the client_id column being absent — not any message that
+  // merely mentions client_id.
+  if (error.code === "42703" || error.code === "PGRST204") return true;
+  return /client_id/.test(error.message ?? "") && /column|does not exist|schema cache/i.test(error.message ?? "");
 }
 
 /**
@@ -57,20 +57,34 @@ export async function saveMenu(
   if (!result.ok) return { error: result.error };
   const menu: ValidMenu = result.menu;
 
-  // 1. Insert any inline-created meals into the library (idempotent on the
-  //    (coach_id, type, text) unique), collecting their ids to link.
+  // 1. Insert any inline-created meals into the library in ONE upsert
+  //    (idempotent on the (coach_id, type, text) unique), then map each back to
+  //    its id by (type, text) so we can link it.
   const newMealIds: string[] = [];
-  for (const m of menu.newMeals) {
+  if (menu.newMeals.length) {
+    const key = (type: string, text: string) => `${type}\u0000${text}`;
+    // De-dupe identical (type, text) rows so the upsert payload is clean.
+    const uniqueRows = new Map(
+      menu.newMeals.map((m) => [
+        key(m.type, m.text),
+        { coach_id: coachId, type: m.type, text: m.text, recipe_url: m.recipeUrl },
+      ]),
+    );
     const { data, error } = await supabase
       .from("meal_library")
-      .upsert(
-        { coach_id: coachId, type: m.type, text: m.text, recipe_url: m.recipeUrl },
-        { onConflict: "coach_id,type,text" },
-      )
-      .select("id")
-      .single();
+      .upsert([...uniqueRows.values()], { onConflict: "coach_id,type,text" })
+      .select("id, type, text");
     if (error || !data) return { error: "שמירת מנה חדשה נכשלה, נסו שוב" };
-    newMealIds.push(data.id as string);
+    const idByKey = new Map(
+      (data as { id: string; type: string; text: string }[]).map((r) => [
+        key(r.type, r.text),
+        r.id,
+      ]),
+    );
+    for (const k of uniqueRows.keys()) {
+      const id = idByKey.get(k);
+      if (id) newMealIds.push(id);
+    }
   }
 
   const allMealIds = [...new Set([...menu.selectedMealIds, ...newMealIds])];
@@ -106,15 +120,25 @@ export async function saveMenu(
     savedMenuId = data.id as string;
   }
 
-  // 3. Replace the menu's meal links (delete then insert the full set).
+  // 3. Reconcile the menu's meal links WITHOUT a window of zero meals: upsert
+  //    the desired set first (idempotent on the PK), then delete the obsolete
+  //    ones. The draft always has >=1 meal, so `allMealIds` is never empty.
   if (savedMenuId) {
-    await supabase.from("menu_meal").delete().eq("menu_id", savedMenuId);
-    if (allMealIds.length) {
-      const { error } = await supabase
-        .from("menu_meal")
-        .insert(allMealIds.map((meal_id) => ({ menu_id: savedMenuId, meal_id })));
-      if (error) return { error: "שמירת המנות בתפריט נכשלה, נסו שוב" };
-    }
+    const { error: linkError } = await supabase
+      .from("menu_meal")
+      .upsert(
+        allMealIds.map((meal_id) => ({ menu_id: savedMenuId, meal_id })),
+        { onConflict: "menu_id,meal_id", ignoreDuplicates: true },
+      );
+    if (linkError) return { error: "שמירת המנות בתפריט נכשלה, נסו שוב" };
+
+    const keep = allMealIds.map((id) => `"${id}"`).join(",");
+    const { error: pruneError } = await supabase
+      .from("menu_meal")
+      .delete()
+      .eq("menu_id", savedMenuId)
+      .not("meal_id", "in", `(${keep})`);
+    if (pruneError) return { error: "שמירת המנות בתפריט נכשלה, נסו שוב" };
   }
 
   revalidatePath("/menus");
@@ -122,15 +146,16 @@ export async function saveMenu(
 }
 
 function menuWriteError(error: { code?: string; message?: string } | null): SaveMenuState {
+  // Unique (coach_id, name): a menu with this name already exists. Check this
+  // first so a real unique violation is never mistaken for a missing column.
+  if (error?.code === "23505") {
+    return { error: "כבר קיים תפריט בשם הזה" };
+  }
   if (error && isMissingClientColumn(error)) {
     return {
       error:
         "האפשרות ״מתאמנת יחידה״ תתאפשר לאחר החלת מיגרציה 0010 (באישור Nirit). בינתיים אפשר לפרסם לכל המתאמנות.",
     };
-  }
-  // Unique (coach_id, name): a menu with this name already exists.
-  if (error?.code === "23505") {
-    return { error: "כבר קיים תפריט בשם הזה" };
   }
   return { error: "השמירה נכשלה, נסו שוב" };
 }

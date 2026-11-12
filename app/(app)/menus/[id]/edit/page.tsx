@@ -44,7 +44,7 @@ export default async function EditMenuPage({
           name: menu.name,
           publishDate: menu.publishDate,
           selectedMealIds: menu.selectedMealIds,
-          appliesToClientId: null,
+          appliesToClientId: menu.appliesToClientId,
         }}
       />
 

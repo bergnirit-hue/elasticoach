@@ -204,8 +204,10 @@ export function menuDraftFromForm(form: FormLike): MenuDraft {
     const type = types[i];
     const text = typeof texts[i] === "string" ? (texts[i] as string) : "";
     const url = typeof urls[i] === "string" ? (urls[i] as string) : "";
-    // Skip fully-empty rows; keep rows the coach started so errors surface.
-    if ((typeof type !== "string" || type === "") && text.trim() === "") continue;
+    // A new meal is defined by its text. Drop rows the coach added but left
+    // blank (the type hidden input is always present), so an empty row never
+    // blocks the save. A row with text but a bad type still surfaces an error.
+    if (text.trim() === "") continue;
     newMeals.push({
       type: type as MealType,
       text,

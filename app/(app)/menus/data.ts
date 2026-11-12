@@ -83,7 +83,17 @@ export interface MenuForEdit {
   id: string;
   name: string;
   publishDate: string;
+  /** The targeted client, or null for an all-clients menu. */
+  appliesToClientId: string | null;
   selectedMealIds: string[];
+}
+
+interface MenuEditRow {
+  id: string;
+  name: string;
+  publish_date: string;
+  client_id?: string | null;
+  menu_meal: { meal_id: string }[] | null;
 }
 
 export async function loadMenuForEdit(
@@ -91,25 +101,33 @@ export async function loadMenuForEdit(
   coachId: string,
   menuId: string,
 ): Promise<MenuForEdit | null> {
-  const { data } = await supabase
+  // client_id exists only once migration 0010 is applied. Try to read it; if
+  // the column is absent, fall back so the editor still works (all-clients).
+  const withClient = await supabase
     .from("menu")
-    .select("id, name, publish_date, menu_meal(meal_id)")
+    .select("id, name, publish_date, client_id, menu_meal(meal_id)")
     .eq("coach_id", coachId)
     .eq("id", menuId)
     .maybeSingle();
 
+  let data = withClient.data as MenuEditRow | null;
+  if (withClient.error) {
+    const fallback = await supabase
+      .from("menu")
+      .select("id, name, publish_date, menu_meal(meal_id)")
+      .eq("coach_id", coachId)
+      .eq("id", menuId)
+      .maybeSingle();
+    data = fallback.data as MenuEditRow | null;
+  }
+
   if (!data) return null;
-  const row = data as {
-    id: string;
-    name: string;
-    publish_date: string;
-    menu_meal: { meal_id: string }[] | null;
-  };
   return {
-    id: row.id,
-    name: row.name,
-    publishDate: row.publish_date,
-    selectedMealIds: (row.menu_meal ?? []).map((l) => l.meal_id),
+    id: data.id,
+    name: data.name,
+    publishDate: data.publish_date,
+    appliesToClientId: data.client_id ?? null,
+    selectedMealIds: (data.menu_meal ?? []).map((l) => l.meal_id),
   };
 }
 
