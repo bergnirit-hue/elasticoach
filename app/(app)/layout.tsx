@@ -34,6 +34,11 @@ export default async function AppLayout({
               המתאמנים שלי
             </Link>
           )}
+          {userIsCoach && (
+            <Link href="/menus" className="font-medium hover:underline">
+              תפריטים
+            </Link>
+          )}
           <Link href="/calendar" className="font-medium hover:underline">
             לוח שנה
           </Link>
