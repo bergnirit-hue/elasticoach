@@ -4,24 +4,20 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
+  menuClientId,
   menuDraftFromForm,
   validateMenuDraft,
   type ValidMenu,
 } from "@/lib/menus/builder";
 import { loadCoachClients } from "./data";
+import { isMissingClientColumn } from "./errors";
 
 export interface SaveMenuState {
   error?: string;
 }
 
-/** Postgres "column does not exist" — menu.client_id before migration 0010. */
-function isMissingClientColumn(error: { code?: string; message?: string }): boolean {
-  // Match the schema-cache / undefined-column codes, and only a message that is
-  // specifically about the client_id column being absent — not any message that
-  // merely mentions client_id.
-  if (error.code === "42703" || error.code === "PGRST204") return true;
-  return /client_id/.test(error.message ?? "") && /column|does not exist|schema cache/i.test(error.message ?? "");
-}
+const SINGLE_CLIENT_NEEDS_MIGRATION =
+  "האפשרות ״מתאמנת יחידה״ תתאפשר לאחר החלת מיגרציה 0010 (באישור Nirit). בינתיים אפשר לפרסם לכל המתאמנות.";
 
 /**
  * Create or update a coach menu (EC-40). Validates the draft against the
@@ -89,36 +85,24 @@ export async function saveMenu(
 
   const allMealIds = [...new Set([...menu.selectedMealIds, ...newMealIds])];
 
-  // 2. The menu row. client_id is set only for a single-client menu; it needs
-  //    migration 0010. Omitting it entirely keeps the all-clients path working
-  //    whether or not 0010 has been applied.
+  // 2. The menu row. client_id is ALWAYS derived (null for all-clients) so that
+  //    switching a menu from a single client back to "all" clears the old
+  //    scoping. The column only exists once migration 0010 is applied, so
+  //    writeMenuRow strips client_id and retries for the all-clients path when
+  //    the column is still missing (keeping all-clients working pre-0010), and
+  //    returns a guidance error for a single-client menu.
+  const isAllClients = menu.appliesTo.kind === "all";
   const menuRow: Record<string, unknown> = {
     coach_id: coachId,
     name: menu.name,
     publish_date: menu.publishDate,
+    client_id: menuClientId(menu.appliesTo),
     updated_at: new Date().toISOString(),
   };
-  if (menu.appliesTo.kind === "client") {
-    menuRow.client_id = menu.appliesTo.clientId;
-  }
 
-  let savedMenuId = menuId;
-  if (menuId) {
-    const { error } = await supabase
-      .from("menu")
-      .update(menuRow)
-      .eq("id", menuId)
-      .eq("coach_id", coachId);
-    if (error) return menuWriteError(error);
-  } else {
-    const { data, error } = await supabase
-      .from("menu")
-      .insert(menuRow)
-      .select("id")
-      .single();
-    if (error || !data) return menuWriteError(error);
-    savedMenuId = data.id as string;
-  }
+  const written = await writeMenuRow(supabase, coachId, menuId, menuRow, isAllClients);
+  if ("error" in written) return written.error;
+  const savedMenuId = written.id;
 
   // 3. Reconcile the menu's meal links WITHOUT a window of zero meals: upsert
   //    the desired set first (idempotent on the PK), then delete the obsolete
@@ -145,17 +129,59 @@ export async function saveMenu(
   redirect("/menus");
 }
 
-function menuWriteError(error: { code?: string; message?: string } | null): SaveMenuState {
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+type PgError = { code?: string; message?: string } | null;
+
+/**
+ * Insert (or update) the menu row. When the DB is still missing `menu.client_id`
+ * (migration 0010 not applied): for an all-clients menu, retry without
+ * client_id so publishing keeps working; for a single-client menu, surface the
+ * guidance error. Returns the saved menu id or a ready error state.
+ */
+async function writeMenuRow(
+  supabase: Supabase,
+  coachId: string,
+  menuId: string | null,
+  menuRow: Record<string, unknown>,
+  isAllClients: boolean,
+): Promise<{ id: string } | { error: SaveMenuState }> {
+  const run = async (row: Record<string, unknown>): Promise<{ id?: string; error: PgError }> => {
+    if (menuId) {
+      const { error } = await supabase
+        .from("menu")
+        .update(row)
+        .eq("id", menuId)
+        .eq("coach_id", coachId);
+      return { id: menuId, error };
+    }
+    const { data, error } = await supabase
+      .from("menu")
+      .insert(row)
+      .select("id")
+      .single();
+    return { id: data?.id as string | undefined, error };
+  };
+
+  let { id, error } = await run(menuRow);
+  if (error && isMissingClientColumn(error)) {
+    if (!isAllClients) return { error: { error: SINGLE_CLIENT_NEEDS_MIGRATION } };
+    // All-clients menu on a pre-0010 DB: the column isn't there to set.
+    const withoutClient = { ...menuRow };
+    delete withoutClient.client_id;
+    ({ id, error } = await run(withoutClient));
+  }
+  if (error || !id) return { error: menuWriteError(error) };
+  return { id };
+}
+
+function menuWriteError(error: PgError): SaveMenuState {
   // Unique (coach_id, name): a menu with this name already exists. Check this
   // first so a real unique violation is never mistaken for a missing column.
   if (error?.code === "23505") {
     return { error: "כבר קיים תפריט בשם הזה" };
   }
-  if (error && isMissingClientColumn(error)) {
-    return {
-      error:
-        "האפשרות ״מתאמנת יחידה״ תתאפשר לאחר החלת מיגרציה 0010 (באישור Nirit). בינתיים אפשר לפרסם לכל המתאמנות.",
-    };
+  if (isMissingClientColumn(error)) {
+    return { error: SINGLE_CLIENT_NEEDS_MIGRATION };
   }
   return { error: "השמירה נכשלה, נסו שוב" };
 }

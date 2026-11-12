@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  menuClientId,
   menuDraftFromForm,
   validateMenuDraft,
   MENU_NAME_MAX_LENGTH,
@@ -190,6 +191,16 @@ describe("validateMenuDraft", () => {
       expect(r.ok).toBe(true);
       if (r.ok) expect(r.menu.newMeals[0].recipeUrl).toBeNull();
     });
+  });
+});
+
+describe("menuClientId", () => {
+  it("is null for an all-clients menu (so editing clears old scoping)", () => {
+    expect(menuClientId({ kind: "all" })).toBeNull();
+  });
+
+  it("is the client id for a single-client menu", () => {
+    expect(menuClientId({ kind: "client", clientId: "client-1" })).toBe("client-1");
   });
 });
 

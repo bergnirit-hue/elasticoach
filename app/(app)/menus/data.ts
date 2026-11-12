@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Meal, MealType } from "@/lib/menus/types";
 import { MEAL_TYPES } from "@/lib/menus/types";
+import { isMissingClientColumn } from "./errors";
 
 /**
  * Server-side loaders for the coach menu builder (EC-40). All queries are
@@ -111,7 +112,10 @@ export async function loadMenuForEdit(
     .maybeSingle();
 
   let data = withClient.data as MenuEditRow | null;
-  if (withClient.error) {
+  // Only fall back for a genuinely-absent column (pre-0010). A real/transient
+  // error must NOT be swallowed into an all-clients view of a single-client
+  // menu — let it surface as "not found" rather than silently mis-scoping.
+  if (withClient.error && isMissingClientColumn(withClient.error)) {
     const fallback = await supabase
       .from("menu")
       .select("id, name, publish_date, menu_meal(meal_id)")

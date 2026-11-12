@@ -158,6 +158,17 @@ export function validateMenuDraft(
   };
 }
 
+/**
+ * The `menu.client_id` value a draft maps to: the targeted client for a
+ * single-client menu, or null for an all-clients menu. Deriving this in one
+ * pure place (rather than inline in the action) means an edit that switches a
+ * menu from a single client back to "all" always writes null and clears the
+ * old scoping.
+ */
+export function menuClientId(appliesTo: AppliesTo): string | null {
+  return appliesTo.kind === "client" ? appliesTo.clientId : null;
+}
+
 /** Accept only absolute http(s) URLs (recipe links). */
 export function isHttpUrl(value: string): boolean {
   try {
