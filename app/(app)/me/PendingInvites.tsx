@@ -39,7 +39,7 @@ function InviteRow({ invite }: { invite: PendingInvite }) {
   );
 
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-line p-3">
+    <li className="flex flex-col gap-2 rounded-sm border border-line p-3">
       <span className="font-medium">
         {coachLabel(invite.coachName)} מבקש/ת ללוות אותך
       </span>
@@ -50,7 +50,7 @@ function InviteRow({ invite }: { invite: PendingInvite }) {
           name="action"
           value="accept"
           disabled={pending}
-          className="rounded-lg bg-black px-4 py-2 font-medium text-white disabled:opacity-50"
+          className="btn-brand px-4 py-2 disabled:opacity-50"
         >
           {pending ? "רגע…" : "אישור"}
         </button>
@@ -59,13 +59,13 @@ function InviteRow({ invite }: { invite: PendingInvite }) {
           name="action"
           value="decline"
           disabled={pending}
-          className="rounded-lg border border-black/15 px-4 py-2 font-medium disabled:opacity-50"
+          className="rounded-sm border border-line px-4 py-2 font-medium hover:bg-surface-2 disabled:opacity-50"
         >
           דחייה
         </button>
       </form>
       {state && !state.ok && (
-        <p role="status" className="text-sm text-red-700">
+        <p role="status" className="text-sm text-danger">
           {state.message}
         </p>
       )}

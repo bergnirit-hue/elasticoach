@@ -5,7 +5,8 @@ import { addDays, hebrewLongDate, isValidYmd, today } from "@/lib/date";
 import { MEAL_SLOTS, type Feedback } from "@/lib/feedback";
 import { CoachFeedback } from "./CoachFeedback";
 
-const card = "rounded-xl border border-black/10 p-4 flex flex-col gap-3";
+const card =
+  "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
 
 type Journal = Record<string, string>;
 
@@ -98,7 +99,7 @@ export default async function ClientDayPage({
 
   return (
     <section className="flex flex-col gap-4">
-      <Link href="/clients" className="text-sm opacity-70 hover:underline">
+      <Link href="/clients" className="text-sm text-ink-soft hover:underline">
         → חזרה למתאמנים
       </Link>
       <h1 className="text-xl font-bold">{client?.display_name ?? "מתאמן/ת"}</h1>
@@ -107,7 +108,7 @@ export default async function ClientDayPage({
         {/* RTL: next day on the left, previous day on the right. */}
         <Link
           href={`/clients/${id}?d=${addDays(date, 1)}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="יום הבא"
         >
           ‹
@@ -119,7 +120,7 @@ export default async function ClientDayPage({
           {!isToday && (
             <Link
               href={`/clients/${id}`}
-              className="text-xs opacity-60 hover:underline"
+              className="text-xs text-brand hover:underline"
             >
               חזרה להיום
             </Link>
@@ -127,7 +128,7 @@ export default async function ClientDayPage({
         </div>
         <Link
           href={`/clients/${id}?d=${addDays(date, -1)}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="יום קודם"
         >
           ›
@@ -139,13 +140,13 @@ export default async function ClientDayPage({
         <h2 className="font-bold">מים וצעדים</h2>
         <div className="flex gap-6">
           <div>
-            <div className="text-sm opacity-70">מים</div>
+            <div className="text-sm text-ink-soft">מים</div>
             <div className="text-lg font-medium tabular-nums">
               {((day?.water_ml ?? 0) / 1000).toFixed(2)} ליטר
             </div>
           </div>
           <div>
-            <div className="text-sm opacity-70">צעדים</div>
+            <div className="text-sm text-ink-soft">צעדים</div>
             <div className="text-lg font-medium tabular-nums">
               {(day?.steps ?? 0).toLocaleString("he-IL")}
             </div>
@@ -157,12 +158,12 @@ export default async function ClientDayPage({
       <div className={card}>
         <h2 className="font-bold">יומן אכילה</h2>
         {journalSlots.length === 0 ? (
-          <p className="text-sm opacity-70">אין דיווח אכילה ליום הזה.</p>
+          <p className="text-sm text-ink-soft">אין דיווח אכילה ליום הזה.</p>
         ) : (
           <dl className="flex flex-col gap-2">
             {journalSlots.map((slot) => (
               <div key={slot.key}>
-                <dt className="text-sm opacity-70">{slot.label}</dt>
+                <dt className="text-sm text-ink-soft">{slot.label}</dt>
                 <dd className="whitespace-pre-wrap">{journal[slot.key]}</dd>
               </div>
             ))}
@@ -174,21 +175,21 @@ export default async function ClientDayPage({
       <div className={card}>
         <h2 className="font-bold">אימונים</h2>
         {workouts.length === 0 ? (
-          <p className="text-sm opacity-70">אין אימון מתוכנן ליום הזה.</p>
+          <p className="text-sm text-ink-soft">אין אימון מתוכנן ליום הזה.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {workouts.map((w) => (
               <li
                 key={w.id}
-                className={`flex items-center gap-3 rounded-lg border p-2.5 ${
-                  w.done ? "border-emerald-600 bg-emerald-50" : "border-black/10"
+                className={`flex items-center gap-3 rounded-sm border p-2.5 ${
+                  w.done ? "border-good bg-good/10" : "border-line"
                 }`}
               >
                 <span
                   className={`h-6 w-6 flex-none rounded-md border-2 text-center font-bold leading-5 ${
                     w.done
-                      ? "border-emerald-600 bg-emerald-600 text-white"
-                      : "border-black/30"
+                      ? "border-good bg-good text-white"
+                      : "border-line"
                   }`}
                   aria-label={w.done ? "בוצע" : "לא בוצע"}
                 >
@@ -197,12 +198,12 @@ export default async function ClientDayPage({
                 <div className="min-w-0 flex-1">
                   <strong>{w.type}</strong>
                   {w.scheduled_time && (
-                    <span className="opacity-60 tabular-nums">
+                    <span className="text-ink-soft tabular-nums">
                       {" "}
                       {w.scheduled_time.slice(0, 5)}
                     </span>
                   )}
-                  {w.note && <div className="text-sm opacity-70">{w.note}</div>}
+                  {w.note && <div className="text-sm text-ink-soft">{w.note}</div>}
                 </div>
               </li>
             ))}
@@ -214,16 +215,16 @@ export default async function ClientDayPage({
       <div className={card}>
         <h2 className="font-bold">מדדים אחרונים</h2>
         {!measure ? (
-          <p className="text-sm opacity-70">עדיין אין מדידות.</p>
+          <p className="text-sm text-ink-soft">עדיין אין מדידות.</p>
         ) : (
           <div className="flex flex-col gap-2">
-            <p className="text-sm opacity-70">
+            <p className="text-sm text-ink-soft">
               נמדד ב־{hebrewLongDate(measure.date)}
             </p>
             <div className="flex flex-wrap gap-6">
               {measure.weight != null && (
                 <div>
-                  <div className="text-sm opacity-70">משקל</div>
+                  <div className="text-sm text-ink-soft">משקל</div>
                   <div className="text-lg font-medium tabular-nums">
                     {measure.weight} ק״ג
                   </div>
@@ -231,7 +232,7 @@ export default async function ClientDayPage({
               )}
               {measure.body_fat_pct != null && (
                 <div>
-                  <div className="text-sm opacity-70">אחוז שומן</div>
+                  <div className="text-sm text-ink-soft">אחוז שומן</div>
                   <div className="text-lg font-medium tabular-nums">
                     {measure.body_fat_pct}%
                   </div>
@@ -239,7 +240,7 @@ export default async function ClientDayPage({
               )}
               {measure.muscle_pct != null && (
                 <div>
-                  <div className="text-sm opacity-70">אחוז שריר</div>
+                  <div className="text-sm text-ink-soft">אחוז שריר</div>
                   <div className="text-lg font-medium tabular-nums">
                     {measure.muscle_pct}%
                   </div>
@@ -251,7 +252,7 @@ export default async function ClientDayPage({
                 <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
                   {Object.entries(measure.circumferences).map(([k, v]) => (
                     <div key={k} className="flex gap-1">
-                      <dt className="opacity-70">{k}</dt>
+                      <dt className="text-ink-soft">{k}</dt>
                       <dd className="tabular-nums">{String(v)}</dd>
                     </div>
                   ))}

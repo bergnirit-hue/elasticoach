@@ -17,9 +17,9 @@ import {
 } from "./measures";
 import { validatePhotoFile } from "./photo";
 
-const card = "rounded-xl border border-black/10 p-4 flex flex-col gap-3";
+const card = "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
 const field =
-  "rounded-lg border border-black/15 bg-background p-2 text-start w-full";
+  "rounded-sm border border-line bg-background p-2 text-start w-full";
 
 const str = (n: number | null | undefined) => (n == null ? "" : String(n));
 
@@ -118,7 +118,7 @@ export function MeasuresPanel({
       <h2 className="font-bold">מדידות</h2>
 
       {goalWeight !== null && (
-        <p className="text-sm opacity-70">
+        <p className="text-sm text-ink-soft">
           {startWeight !== null && <>התחלה {startWeight} ק״ג · </>}
           {latestWeight !== null && <>עכשיו {latestWeight} ק״ג · </>}
           יעד {goalWeight} ק״ג
@@ -126,7 +126,7 @@ export function MeasuresPanel({
       )}
 
       <form onSubmit={submit} className="flex flex-col gap-3">
-        <p className="text-sm opacity-70">מדידה ל{hebrewLongDate(date)}</p>
+        <p className="text-sm text-ink-soft">מדידה ל{hebrewLongDate(date)}</p>
         <div className="grid grid-cols-3 gap-2">
           <label className="flex flex-col gap-1 text-sm">
             משקל (ק״ג)
@@ -186,14 +186,14 @@ export function MeasuresPanel({
           <button
             type="submit"
             disabled={pending}
-            className="rounded-lg bg-foreground px-4 py-2 text-sm text-background disabled:opacity-50"
+            className="btn-brand px-4 py-2 text-sm disabled:opacity-50"
           >
             שמירת מדידה
           </button>
           {message && (
             <span
               role="status"
-              className={`text-sm ${message.ok ? "opacity-70" : "text-red-600"}`}
+              className={`text-sm ${message.ok ? "text-ink-soft" : "text-danger"}`}
             >
               {message.text}
             </span>
@@ -203,9 +203,9 @@ export function MeasuresPanel({
 
       {/* "before" photo (EC-41): private, owner-only. Coach viewing is an open
           product/legal question (EC-7) and is intentionally not wired. */}
-      <div className="flex flex-col gap-2 border-t border-black/10 pt-3">
+      <div className="flex flex-col gap-2 border-t border-line pt-3">
         <h3 className="text-sm font-medium">תמונת ״לפני״ (לא חובה)</h3>
-        <p className="text-xs opacity-60">
+        <p className="text-xs text-ink-soft">
           פרטית — נראית רק לך. עד 5MB, בפורמט JPG, PNG או WEBP.
         </p>
         {photoUrl && (
@@ -214,13 +214,13 @@ export function MeasuresPanel({
             <img
               src={photoUrl}
               alt={`תמונת לפני מ${hebrewLongDate(date)}`}
-              className="max-h-48 w-auto rounded-lg border border-black/10 object-contain"
+              className="max-h-48 w-auto rounded-sm border border-line object-contain"
             />
             <button
               type="button"
               onClick={removePhoto}
               disabled={pending}
-              className="rounded-lg border border-black/15 px-2 py-1 text-xs disabled:opacity-50"
+              className="rounded-sm border border-line px-2 py-1 text-xs disabled:opacity-50"
             >
               הסרת התמונה
             </button>
@@ -233,16 +233,16 @@ export function MeasuresPanel({
           onChange={onPhotoChange}
           disabled={pending}
           aria-label="העלאת תמונת לפני"
-          className="text-sm file:me-2 file:rounded-lg file:border file:border-black/15 file:bg-background file:px-3 file:py-1.5 file:text-sm"
+          className="text-sm file:me-2 file:rounded-sm file:border file:border-line file:bg-background file:px-3 file:py-1.5 file:text-sm"
         />
       </div>
 
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">היסטוריה</h3>
         {history.length === 0 ? (
-          <p className="text-sm opacity-70">עדיין אין מדידות.</p>
+          <p className="text-sm text-ink-soft">עדיין אין מדידות.</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-black/10 text-sm">
+          <ul className="flex flex-col divide-y divide-line text-sm">
             {history.map((m) => {
               const delta = deltas.get(m.date) ?? null;
               const circs = CIRCUMFERENCES.filter(
@@ -259,7 +259,7 @@ export function MeasuresPanel({
                     <Link href={`/me?d=${m.date}`} className="font-medium hover:underline">
                       {hebrewLongDate(m.date)}
                     </Link>
-                    <span className="opacity-80 tabular-nums">
+                    <span className="tabular-nums">
                       {[
                         m.weight !== null && `${m.weight} ק״ג`,
                         m.body_fat_pct !== null && `שומן ${m.body_fat_pct}%`,
@@ -268,18 +268,18 @@ export function MeasuresPanel({
                         .filter(Boolean)
                         .join(" · ")}
                       {delta !== null && delta !== 0 && (
-                        <span dir="ltr" className="ms-2 opacity-70">
+                        <span dir="ltr" className="ms-2 text-ink-soft">
                           {delta > 0 ? `+${delta}` : delta}
                         </span>
                       )}
                     </span>
-                    {circs && <span className="opacity-60">{circs}</span>}
+                    {circs && <span className="text-ink-soft">{circs}</span>}
                   </div>
                   <button
                     type="button"
                     onClick={() => remove(m.date)}
                     disabled={pending}
-                    className="rounded-lg border border-black/15 px-2 py-1 text-xs"
+                    className="rounded-sm border border-line px-2 py-1 text-xs"
                     aria-label={`מחיקת המדידה מ${hebrewLongDate(m.date)}`}
                   >
                     ✕
