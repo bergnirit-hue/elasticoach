@@ -1,26 +1,184 @@
 @import "tailwindcss";
 
+/* =========================================================================
+   Elasticoach design tokens
+   -------------------------------------------------------------------------
+   White-label contract: a coach overrides only --brand (and optionally
+   --brand-2 for the gradient end). Everything brand-colored derives from
+   those with color-mix, so one value re-skins the whole app. Text, surfaces
+   and status colors stay neutral/fixed so WCAG AA contrast holds for ANY
+   brand color. See the design-system reference for the full contract.
+   ========================================================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand — the only values a coach supplies */
+  --brand: #1aa39c;            /* generic-but-pretty default (teal) */
+  --brand-2: #4f46e5;          /* gradient end / secondary (indigo) */
+  --on-brand: #ffffff;         /* text/icons on a brand fill */
+  --brand-strong: color-mix(in srgb, var(--brand) 84%, #000);
+  --brand-soft: color-mix(in srgb, var(--brand) 12%, #fff);
+  --brand-grad: linear-gradient(135deg, var(--brand), var(--brand-2));
+
+  /* Neutrals — slight cool bias so they sit calmly under any brand */
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f7;
+  --ink: #16202e;
+  --ink-soft: #5a6676;
+  --line: #e4e9f0;
+
+  /* Fixed accents — meaning-carrying, never themed per coach */
+  --water: #19a7d6;
+  --water-soft: color-mix(in srgb, var(--water) 12%, #fff);
+  --gold: #f5b301;
+  --coral: #ff5d73;
+  --good: #15a06b;
+
+  /* Status */
+  --success: #15a06b;
+  --warning: #d9820a;
+  --danger: #dc3b4b;
+  --info: #19a7d6;
+
+  /* Shape & depth */
+  --radius-card: 12px;
+  --radius-sm: 9px;
+  --radius-pill: 999px;
+  --shadow-card: 0 6px 22px -12px rgba(22, 32, 60, 0.24);
+  --shadow-pop: 0 12px 30px -10px rgba(40, 40, 120, 0.4);
+
+  /* Back-compat with screens that still use bg-background / text-foreground */
+  --background: var(--bg);
+  --foreground: var(--ink);
+
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-}
-
+/* Dark — redefine tokens only. Guarded so an explicit light choice wins. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --brand-soft: color-mix(in srgb, var(--brand) 22%, #0b1220);
+    --bg: #0c131d;
+    --surface: #141d2a;
+    --surface-2: #1b2635;
+    --ink: #eaf0f7;
+    --ink-soft: #9aa7b8;
+    --line: #273243;
+    --water-soft: color-mix(in srgb, var(--water) 24%, #0c131d);
+    --shadow-card: 0 8px 26px -14px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
   }
 }
+/* Same dark values for an explicit dark toggle, so it wins both ways. */
+:root[data-theme="dark"] {
+  --brand-soft: color-mix(in srgb, var(--brand) 22%, #0b1220);
+  --bg: #0c131d;
+  --surface: #141d2a;
+  --surface-2: #1b2635;
+  --ink: #eaf0f7;
+  --ink-soft: #9aa7b8;
+  --line: #273243;
+  --water-soft: color-mix(in srgb, var(--water) 24%, #0c131d);
+  --shadow-card: 0 8px 26px -14px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
 
+/* Expose tokens to Tailwind utilities: bg-brand, text-ink, border-line,
+   rounded-card, font-display, text-water, etc. */
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+
+  --color-water: var(--water);
+  --color-water-soft: var(--water-soft);
+  --color-gold: var(--gold);
+  --color-coral: var(--coral);
+  --color-good: var(--good);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --radius-card: var(--radius-card);
+  --radius-sm: var(--radius-sm);
+  --radius-pill: var(--radius-pill);
+
+  --font-sans: var(--font-assistant), "Assistant", system-ui, "Arial Hebrew", Arial, sans-serif;
+  --font-display: var(--font-secular), "Secular One", var(--font-assistant), system-ui, sans-serif;
+}
+
+/* ===== Components ===== */
+@layer components {
+  /* Primary action — the single place the brand gradient appears as a fill.
+     White-label: re-skins automatically with --brand / --brand-2. */
+  .btn-brand {
+    background: var(--brand-grad);
+    color: var(--on-brand);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  .btn-brand:hover { filter: brightness(1.06); }
+  .btn-brand:active { transform: translateY(1px); }
+  .btn-brand:disabled { opacity: 0.5; filter: none; transform: none; }
+}
+
+/* ===== Base ===== */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  /* Hebrew-friendly system stack; a web font (Heebo/Assistant) can be added later. */
-  font-family: "Assistant", "Heebo", system-ui, "Arial Hebrew", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  font-weight: 400; /* Secular One is a single display weight */
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Accessible focus — IS 5568 / WCAG AA, RTL-safe (logical offset) */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 26%, transparent);
+}
+
+/* Playful "pop" — a spring-ish scale used when a meal is swapped (EC-13).
+   Opt-in via the .ec-pop class; the reduced-motion block below neutralizes it. */
+@keyframes ec-pop {
+  0% { transform: scale(0.965); }
+  55% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+.ec-pop {
+  animation: ec-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Respect reduced motion everywhere (the playful layer opts in, not out) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

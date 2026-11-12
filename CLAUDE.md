@@ -37,6 +37,16 @@ When a decision changes, **update the Linear doc first (with a date), then this 
 
 ## Key decisions
 
+### 2026-11-03 — Client self-registration is in MVP; lead capture is optional
+
+- **Self-registration (MVP):** a client can sign up on their own and link to a coach
+  (code/invite) with a `pending` → coach-approved `active` handshake (EC-45). This formalizes
+  the consent-based accept flow that EC-38's direct-`active` linking deferred. Manual linking
+  by the coach remains.
+- **Lead capture (optional, post-MVP):** collecting leads — a `leads` table, a public
+  per-coach landing/signup page (+QR), and a "leads" inbox tab that converts a lead to
+  `coach_client` — is its own optional epic, **P-EC-18**, not part of the MVP.
+
 ### 2026-11-02 — Skip editing the artifact; copy it to the new app
 
 - The existing app "הדרך של נירית" is a single-user Claude artifact:
@@ -57,6 +67,10 @@ When a decision changes, **update the Linear doc first (with a date), then this 
 - Roles are **per relationship, not per user**. A `coach_client` many-to-many table; one user
   can be coach to some and client of others. UI switch between "my tracking" and "my client(s)".
 - RLS: a coach sees only clients linked to them; a client sees only themselves.
+- **Signup & linking:** full client **self-registration is in the MVP** — client creates an
+  account, links to a coach via code/invite, status `pending` → coach approves → `active`
+  (EC-45). Manual linking by the coach stays. **Lead capture** (public landing page, lead
+  inbox, `leads` table) is a separate **optional / post-MVP** epic (P-EC-18), not in the MVP.
 
 ### Menus (feature 2–3)
 
