@@ -173,6 +173,25 @@ h1, h2, h3, .font-display {
   animation: ec-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Water bottle fill — a traveling surface wave (the signature liquid motion).
+   Two waves at different speeds give depth; the reduced-motion block below
+   freezes them, leaving a still, correctly-filled bottle. */
+@keyframes water-wave {
+  from { transform: translateX(0); }
+  to { transform: translateX(-32px); }
+}
+.water-wave {
+  animation: water-wave linear infinite;
+}
+.water-wave-back {
+  animation-duration: 4.2s;
+  opacity: 0.5;
+}
+.water-wave-front {
+  animation-duration: 2.6s;
+  opacity: 0.9;
+}
+
 /* Respect reduced motion everywhere (the playful layer opts in, not out) */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

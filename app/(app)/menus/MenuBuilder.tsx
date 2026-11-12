@@ -4,6 +4,7 @@ import { useActionState, useId, useRef, useState } from "react";
 import { MEAL_TYPE_LABELS, type MealType } from "@/lib/menus/types";
 import { saveMenu, type SaveMenuState } from "./actions";
 import type { LibraryByType, CoachClientOption } from "./data";
+import { PdfImportCard } from "./PdfImportCard";
 
 interface NewMealRow {
   key: number;
@@ -58,8 +59,10 @@ export function MenuBuilder({ menuId, library, clients, defaults }: Props) {
     );
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
-      {menuId && <input type="hidden" name="menu_id" value={menuId} />}
+    <div className="flex flex-col gap-5">
+      <PdfImportCard />
+      <form action={formAction} className="flex flex-col gap-5">
+        {menuId && <input type="hidden" name="menu_id" value={menuId} />}
 
       {/* --- menu header fields --- */}
       <div className={`${card} flex flex-col gap-4`}>
@@ -290,6 +293,7 @@ export function MenuBuilder({ menuId, library, clients, defaults }: Props) {
           ביטול
         </a>
       </div>
-    </form>
+      </form>
+    </div>
   );
 }

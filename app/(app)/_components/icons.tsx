@@ -72,6 +72,15 @@ export function PlateIcon({ className }: IconProps) {
   );
 }
 
+export function UploadIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 15V4M8 8l4-4 4 4" />
+      <path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" />
+    </svg>
+  );
+}
+
 export function ClipboardIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

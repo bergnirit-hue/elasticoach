@@ -4,7 +4,7 @@ import { useState } from "react";
 import { saveWater } from "./actions";
 import { WATER_PRESETS, clampWater, waterPercent } from "./water";
 import { SaveStatus, useAutosave } from "./useAutosave";
-import { Ring } from "../_components/Ring";
+import { WaterFill } from "../_components/WaterFill";
 
 const card =
   "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
@@ -42,23 +42,17 @@ export function WaterPanel({
   return (
     <div className={card}>
       <div className="flex items-center gap-4">
-        <Ring
-          value={ml}
-          goal={goalMl}
-          color="var(--water)"
-          label={`מים: ${pct}% מהיעד`}
-        >
-          <span className="font-display text-lg leading-none tabular-nums">
-            {(ml / 1000).toFixed(1)}
-          </span>
-          <span className="mt-0.5 text-[10px] text-ink-soft">ליטר</span>
-        </Ring>
+        <WaterFill pct={pct} label={`מים: ${pct}% מהיעד`} />
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex items-baseline justify-between">
             <h2 className="font-bold">מים</h2>
             <span className="text-sm tabular-nums text-ink-soft">
               יעד {(goalMl / 1000).toFixed(1)} ליטר
             </span>
+          </div>
+          <div className="font-display text-2xl leading-none tabular-nums">
+            {(ml / 1000).toFixed(2)}
+            <span className="text-sm text-ink-soft"> ליטר</span>
           </div>
           {ml >= goalMl && (
             <p className="text-sm text-good">הגעת ליעד המים להיום 🎉</p>
