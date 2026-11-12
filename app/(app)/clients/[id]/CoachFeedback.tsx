@@ -11,7 +11,8 @@ import {
   type Feedback,
 } from "@/lib/feedback";
 
-const card = "rounded-xl border border-black/10 p-4 flex flex-col gap-3";
+const card =
+  "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
 
 /**
  * EC-16 — coach-side create/edit/delete of feedback on a client's day/meal.
@@ -93,16 +94,16 @@ export function CoachFeedback({
       <h2 className="font-bold">משוב למתאמן/ת</h2>
 
       {items.length === 0 ? (
-        <p className="text-sm opacity-70">עדיין לא כתבת משוב ליום הזה.</p>
+        <p className="text-sm text-ink-soft">עדיין לא כתבת משוב ליום הזה.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((f) => (
             <li
               key={f.id}
-              className="rounded-lg border border-black/10 p-3 flex flex-col gap-2"
+              className="rounded-sm border border-line p-3 flex flex-col gap-2"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs">
+                <span className="rounded-pill bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand">
                   {targetLabel(f.meal_key)}
                 </span>
                 {editingId !== f.id && (
@@ -110,14 +111,14 @@ export function CoachFeedback({
                     <button
                       type="button"
                       onClick={() => startEdit(f)}
-                      className="opacity-60 hover:opacity-100"
+                      className="text-ink-soft hover:text-ink"
                     >
                       עריכה
                     </button>
                     <button
                       type="button"
                       onClick={() => remove(f)}
-                      className="opacity-60 hover:opacity-100"
+                      className="text-ink-soft hover:text-ink"
                     >
                       מחיקה
                     </button>
@@ -131,21 +132,21 @@ export function CoachFeedback({
                     rows={2}
                     value={editBody}
                     onChange={(e) => setEditBody(e.target.value)}
-                    className="rounded-lg border border-black/15 bg-background p-2.5 text-start"
+                    className="rounded-sm border border-line bg-background p-2.5 text-start"
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => saveEdit(f)}
                       disabled={!cleanBody(editBody)}
-                      className="rounded-lg bg-black px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                      className="btn-brand px-3 py-1.5 text-sm"
                     >
                       שמירה
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditingId(null)}
-                      className="rounded-lg border border-black/15 px-3 py-1.5 text-sm"
+                      className="rounded-sm border border-line px-3 py-1.5 text-sm hover:bg-surface-2"
                     >
                       ביטול
                     </button>
@@ -166,7 +167,7 @@ export function CoachFeedback({
             <select
               value={target}
               onChange={(e) => setTarget(e.target.value)}
-              className="rounded-lg border border-black/15 bg-background p-2.5"
+              className="rounded-sm border border-line bg-background p-2.5"
             >
               <option value={DAY_TARGET}>{targetLabel(DAY_TARGET)}</option>
               {MEAL_SLOTS.map((s) => (
@@ -182,12 +183,12 @@ export function CoachFeedback({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="כתבי משוב למתאמן/ת…"
-          className="rounded-lg border border-black/15 bg-background p-2.5 text-start"
+          className="rounded-sm border border-line bg-background p-2.5 text-start"
         />
         <button
           type="submit"
           disabled={busy || !cleanBody(body)}
-          className="self-start rounded-lg bg-black px-4 py-2.5 font-medium text-white disabled:opacity-50"
+          className="btn-brand self-start px-4 py-2.5"
         >
           {busy ? "שומר…" : "הוספת משוב"}
         </button>

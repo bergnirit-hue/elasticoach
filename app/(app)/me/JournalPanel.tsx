@@ -14,8 +14,8 @@ import {
 } from "./journal";
 import { SaveStatus, useAutosave } from "./useAutosave";
 
-const card = "rounded-xl border border-black/10 p-4 flex flex-col gap-3";
-const field = "rounded-lg border border-black/15 bg-background p-2.5 text-start";
+const card = "rounded-card border border-line bg-surface shadow-card p-4 flex flex-col gap-3";
+const field = "rounded-sm border border-line bg-background p-2.5 text-start";
 
 export function JournalPanel({
   date,
@@ -66,7 +66,7 @@ export function JournalPanel({
         <h2 className="font-bold">יומן אכילה ותחושות</h2>
         <SaveStatus state={state} />
       </div>
-      <p className="text-sm opacity-70">
+      <p className="text-sm text-ink-soft">
         רשמי מה אכלת, עם כמויות אם אפשר, ואיך הרגשת.
       </p>
 
@@ -101,7 +101,7 @@ export function JournalPanel({
             <button
               type="button"
               onClick={() => removeMeal(m.id)}
-              className="rounded-lg border border-black/15 px-3 py-2 text-sm"
+              className="rounded-sm border border-line px-3 py-2 text-sm"
               aria-label="מחיקת ארוחה"
             >
               ✕
@@ -114,7 +114,7 @@ export function JournalPanel({
         type="button"
         onClick={addMeal}
         disabled={journal.meals.length >= MAX_MEALS}
-        className="self-start rounded-lg border border-black/15 px-3 py-1.5 text-sm disabled:opacity-50"
+        className="self-start rounded-sm border border-line px-3 py-1.5 text-sm disabled:opacity-50"
       >
         + הוספת ארוחה
       </button>
@@ -130,10 +130,10 @@ export function JournalPanel({
               aria-label={m.label}
               title={m.label}
               onClick={() => setMood(m.value)}
-              className={`rounded-lg border px-3 py-1.5 text-xl ${
+              className={`rounded-sm border px-3 py-1.5 text-xl ${
                 journal.mood === m.value
-                  ? "border-sky-600 bg-sky-600/10"
-                  : "border-black/15"
+                  ? "border-brand bg-brand-soft"
+                  : "border-line"
               }`}
             >
               {m.emoji}

@@ -105,14 +105,14 @@ export function WorkoutList({
               <div className="min-w-0 flex-1">
                 <strong>{w.type}</strong>
                 {w.scheduled_time && (
-                  <span className="opacity-60 tabular-nums"> {w.scheduled_time.slice(0, 5)}</span>
+                  <span className="text-ink-soft tabular-nums"> {w.scheduled_time.slice(0, 5)}</span>
                 )}
-                {w.note && <div className="text-sm opacity-70">{w.note}</div>}
+                {w.note && <div className="text-sm text-ink-soft">{w.note}</div>}
               </div>
               <button
                 type="button"
                 onClick={() => remove(w)}
-                className="text-sm opacity-60 hover:opacity-100"
+                className="text-sm text-ink-soft hover:text-ink"
                 aria-label="הסרה"
               >
                 הסרה
