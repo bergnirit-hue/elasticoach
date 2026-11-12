@@ -25,7 +25,7 @@ interface Props {
   };
 }
 
-const card = "rounded-card border border-line bg-surface p-4";
+const card = "rounded-card border border-line bg-surface shadow-card p-4";
 const inputBase =
   "rounded-sm border border-line bg-surface p-2.5 text-start text-ink";
 
@@ -93,27 +93,51 @@ export function MenuBuilder({ menuId, library, clients, defaults }: Props) {
 
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 text-sm font-medium">חל על</legend>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              name="applies_to"
-              value="all"
-              checked={appliesTo === "all"}
-              onChange={() => setAppliesTo("all")}
-            />
-            כל המתאמנות
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              name="applies_to"
-              value="client"
-              checked={appliesTo === "client"}
-              onChange={() => setAppliesTo("client")}
-              disabled={clients.length === 0}
-            />
-            מתאמנת יחידה
-          </label>
+          <div
+            role="radiogroup"
+            aria-label="חל על"
+            className="inline-flex rounded-pill border border-line bg-surface-2 p-0.5 text-sm"
+          >
+            <label
+              className={`cursor-pointer rounded-pill px-4 py-1.5 transition-colors ${
+                appliesTo === "all"
+                  ? "bg-surface font-medium text-ink shadow-card"
+                  : "text-ink-soft"
+              }`}
+            >
+              <input
+                type="radio"
+                name="applies_to"
+                value="all"
+                checked={appliesTo === "all"}
+                onChange={() => setAppliesTo("all")}
+                className="sr-only"
+              />
+              כל המתאמנות
+            </label>
+            <label
+              className={`rounded-pill px-4 py-1.5 transition-colors ${
+                clients.length === 0
+                  ? "cursor-not-allowed text-ink-soft/50"
+                  : "cursor-pointer"
+              } ${
+                appliesTo === "client"
+                  ? "bg-surface font-medium text-ink shadow-card"
+                  : "text-ink-soft"
+              }`}
+            >
+              <input
+                type="radio"
+                name="applies_to"
+                value="client"
+                checked={appliesTo === "client"}
+                onChange={() => setAppliesTo("client")}
+                disabled={clients.length === 0}
+                className="sr-only"
+              />
+              מתאמנת יחידה
+            </label>
+          </div>
           {appliesTo === "client" && (
             <select
               name="applies_client_id"
@@ -146,7 +170,14 @@ export function MenuBuilder({ menuId, library, clients, defaults }: Props) {
           const rows = newMeals.filter((r) => r.type === type);
           return (
             <div key={type} className={`${card} flex flex-col gap-3`}>
-              <h3 className="font-display text-base">{MEAL_TYPE_LABELS[type]}</h3>
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="font-display text-base">
+                  {MEAL_TYPE_LABELS[type]}
+                </h3>
+                <span className="text-xs tabular-nums text-ink-soft">
+                  {meals.length} במאגר
+                </span>
+              </div>
 
               {meals.length === 0 && rows.length === 0 ? (
                 <p className="text-sm text-ink-soft">
@@ -251,7 +282,7 @@ export function MenuBuilder({ menuId, library, clients, defaults }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-pill bg-brand px-6 py-2.5 font-medium text-on-brand disabled:opacity-50"
+          className="btn-brand px-6 py-2.5 disabled:opacity-50"
         >
           {pending ? "שומר…" : menuId ? "שמירת שינויים" : "יצירת תפריט"}
         </button>

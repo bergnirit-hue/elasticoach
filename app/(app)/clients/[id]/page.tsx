@@ -138,16 +138,17 @@ export default async function ClientDayPage({
       {/* Water + steps */}
       <div className={card}>
         <h2 className="font-bold">מים וצעדים</h2>
-        <div className="flex gap-6">
-          <div>
-            <div className="text-sm text-ink-soft">מים</div>
-            <div className="text-lg font-medium tabular-nums">
-              {((day?.water_ml ?? 0) / 1000).toFixed(2)} ליטר
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-sm bg-surface-2 p-3">
+            <div className="text-xs text-ink-soft">מים</div>
+            <div className="font-display text-2xl tabular-nums">
+              {((day?.water_ml ?? 0) / 1000).toFixed(2)}
+              <span className="text-sm text-ink-soft"> ליטר</span>
             </div>
           </div>
-          <div>
-            <div className="text-sm text-ink-soft">צעדים</div>
-            <div className="text-lg font-medium tabular-nums">
+          <div className="rounded-sm bg-surface-2 p-3">
+            <div className="text-xs text-ink-soft">צעדים</div>
+            <div className="font-display text-2xl tabular-nums">
               {(day?.steps ?? 0).toLocaleString("he-IL")}
             </div>
           </div>
