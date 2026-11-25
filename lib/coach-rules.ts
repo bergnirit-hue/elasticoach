@@ -204,6 +204,9 @@ export function parseRulesForm(input: {
 const COLUMNS =
   "id, coach_id, client_id, allowed_meal_types, forbidden_meal_tags, water_goal_ml, protein_goal_g, weekly_workout_goal, notes";
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** The coach's default row plus, if given, the override for one client. */
 export async function getCoachRuleRows(
   supabase: SupabaseClient,
@@ -211,8 +214,12 @@ export async function getCoachRuleRows(
   clientId?: string | null,
 ): Promise<CoachRulesRow[]> {
   let query = supabase.from("coach_rules").select(COLUMNS).eq("coach_id", coachId);
-  query = clientId
-    ? query.or(`client_id.is.null,client_id.eq.${clientId}`)
+  // `clientId` is interpolated into a PostgREST `.or()` filter string, so only
+  // a validated UUID is ever passed through; anything else falls back to the
+  // coach-default query (RLS scopes the result either way).
+  const validClientId = clientId && UUID_RE.test(clientId) ? clientId : null;
+  query = validClientId
+    ? query.or(`client_id.is.null,client_id.eq.${validClientId}`)
     : query.is("client_id", null);
   const { data, error } = await query;
   if (error) throw new Error(`coach_rules: ${error.message}`);

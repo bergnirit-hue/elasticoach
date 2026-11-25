@@ -7,7 +7,7 @@ import { MeasuresPanel } from "./MeasuresPanel";
 import { WaterPanel } from "./WaterPanel";
 import { WorkoutList } from "./WorkoutList";
 import { normalizeJournal } from "./journal";
-import { normalizeCircumferences, type Measure } from "./measures";
+import { hasMeasurement, normalizeCircumferences, type Measure } from "./measures";
 import { loadDailyPlan } from "./menuData";
 import { DailyPlanCard } from "./DailyPlanCard";
 import { BEFORE_PHOTOS_BUCKET } from "./photo";
@@ -95,7 +95,9 @@ export default async function DayPage({
     muscle_pct: m.muscle_pct,
     circumferences: normalizeCircumferences(m.circumferences),
   });
-  const history = (measureRows ?? []).map(toMeasure);
+  // Photo-only rows (a date with a "before" photo but no numbers) are not
+  // measurements, so they don't belong in the measurement history list.
+  const history = (measureRows ?? []).map(toMeasure).filter(hasMeasurement);
   // Queried separately so an old date outside the history window still pre-fills.
   const currentMeasure = measureForDay ? toMeasure(measureForDay) : null;
 

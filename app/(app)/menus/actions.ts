@@ -42,44 +42,61 @@ export async function saveMenu(
 
   // Known meal ids (this coach's library) + active clients, for validation.
   const [{ data: libRows }, clients] = await Promise.all([
-    supabase.from("meal_library").select("id").eq("coach_id", coachId),
+    supabase.from("meal_library").select("id, type, text").eq("coach_id", coachId),
     loadCoachClients(supabase, coachId),
   ]);
-  const knownMealIds = new Set((libRows ?? []).map((r) => r.id as string));
+  const libraryRows = (libRows ?? []) as {
+    id: string;
+    type: string;
+    text: string;
+  }[];
+  const knownMealIds = new Set(libraryRows.map((r) => r.id));
   const clientIds = new Set(clients.map((c) => c.id));
+
+  const mealKey = (type: string, text: string) => `${type}\u0000${text}`;
+  // Existing library meals keyed by (type, text): an inline "new" meal that
+  // matches one is REUSED by id and left untouched — re-inserting it would
+  // overwrite the existing row's recipe_url (e.g. with null).
+  const existingIdByKey = new Map(
+    libraryRows.map((r) => [mealKey(r.type, r.text), r.id]),
+  );
 
   const draft = menuDraftFromForm(formData);
   const result = validateMenuDraft(draft, { knownMealIds, clientIds });
   if (!result.ok) return { error: result.error };
   const menu: ValidMenu = result.menu;
 
-  // 1. Insert any inline-created meals into the library in ONE upsert
-  //    (idempotent on the (coach_id, type, text) unique), then map each back to
-  //    its id by (type, text) so we can link it.
+  // 1. Resolve inline-created meals to library ids: reuse an existing meal with
+  //    the same (type, text) as-is, and insert only the genuinely new ones.
   const newMealIds: string[] = [];
   if (menu.newMeals.length) {
-    const key = (type: string, text: string) => `${type}\u0000${text}`;
-    // De-dupe identical (type, text) rows so the upsert payload is clean.
-    const uniqueRows = new Map(
+    // De-dupe identical (type, text) rows the coach typed in this flow.
+    const drafted = new Map(
       menu.newMeals.map((m) => [
-        key(m.type, m.text),
+        mealKey(m.type, m.text),
         { coach_id: coachId, type: m.type, text: m.text, recipe_url: m.recipeUrl },
       ]),
     );
-    const { data, error } = await supabase
-      .from("meal_library")
-      .upsert([...uniqueRows.values()], { onConflict: "coach_id,type,text" })
-      .select("id, type, text");
-    if (error || !data) return { error: "שמירת מנה חדשה נכשלה, נסו שוב" };
-    const idByKey = new Map(
-      (data as { id: string; type: string; text: string }[]).map((r) => [
-        key(r.type, r.text),
-        r.id,
-      ]),
-    );
-    for (const k of uniqueRows.keys()) {
-      const id = idByKey.get(k);
-      if (id) newMealIds.push(id);
+
+    const toInsert: {
+      coach_id: string;
+      type: string;
+      text: string;
+      recipe_url: string | null;
+    }[] = [];
+    for (const [k, row] of drafted) {
+      const existingId = existingIdByKey.get(k);
+      if (existingId) newMealIds.push(existingId);
+      else toInsert.push(row);
+    }
+
+    if (toInsert.length) {
+      const { data, error } = await supabase
+        .from("meal_library")
+        .insert(toInsert)
+        .select("id");
+      if (error || !data) return { error: "שמירת מנה חדשה נכשלה, נסו שוב" };
+      for (const r of data as { id: string }[]) newMealIds.push(r.id);
     }
   }
 

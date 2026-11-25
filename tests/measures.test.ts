@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  hasMeasurement,
   normalizeCircumferences,
   parseMeasureInput,
   weightDeltas,
@@ -78,5 +79,26 @@ describe("water", () => {
     expect(waterPercent(1000, 2000)).toBe(50);
     expect(waterPercent(3000, 2000)).toBe(100);
     expect(waterPercent(500, 0)).toBe(0);
+  });
+});
+
+describe("hasMeasurement", () => {
+  const empty = {
+    weight: null,
+    body_fat_pct: null,
+    muscle_pct: null,
+    circumferences: {},
+  };
+
+  it("is false for a photo-only / empty row", () => {
+    expect(hasMeasurement(empty)).toBe(false);
+    expect(hasMeasurement({ ...empty, circumferences: null })).toBe(false);
+  });
+
+  it("is true when any metric is present", () => {
+    expect(hasMeasurement({ ...empty, weight: 71 })).toBe(true);
+    expect(hasMeasurement({ ...empty, body_fat_pct: 28 })).toBe(true);
+    expect(hasMeasurement({ ...empty, muscle_pct: 40 })).toBe(true);
+    expect(hasMeasurement({ ...empty, circumferences: { waist: 80 } })).toBe(true);
   });
 });

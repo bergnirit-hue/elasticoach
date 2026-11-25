@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { addDays, hebrewLongDate, isValidYmd, today } from "@/lib/date";
 import { MEAL_SLOTS, type Feedback } from "@/lib/feedback";
+import { hasMeasurement } from "../../me/measures";
 import { CoachFeedback } from "./CoachFeedback";
 
 const card =
@@ -74,13 +75,15 @@ export default async function ClientDayPage({
       .eq("user_id", id)
       .eq("scheduled_date", date),
     // Measurements are weekly: show the most recent one on or before this day.
+    // Fetch a small window and pick the latest that is an actual measurement,
+    // so a photo-only row (no numbers) never masquerades as "latest".
     supabase
       .from("measures")
       .select("date, weight, body_fat_pct, muscle_pct, circumferences")
       .eq("user_id", id)
       .lte("date", date)
       .order("date", { ascending: false })
-      .limit(1),
+      .limit(14),
     supabase
       .from("coach_feedback")
       .select("id, coach_id, client_id, date, meal_key, body")
@@ -93,7 +96,8 @@ export default async function ClientDayPage({
   const isToday = date === today();
   const journal = (day?.journal ?? {}) as Journal;
   const workouts = (workoutRows ?? []) as Workout[];
-  const measure = (measureRows?.[0] ?? null) as Measure | null;
+  const measure =
+    ((measureRows ?? []) as Measure[]).find(hasMeasurement) ?? null;
   const feedback = (feedbackRows ?? []) as Feedback[];
   const journalSlots = MEAL_SLOTS.filter((s) => (journal[s.key] ?? "").trim());
 

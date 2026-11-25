@@ -30,6 +30,26 @@ export type MeasureInput = {
 
 export type MeasureValues = Omit<Measure, "date">;
 
+/**
+ * True when a row carries at least one real measurement (weight / body-fat /
+ * muscle / a circumference) rather than ONLY a "before" photo. A photo-only
+ * `measures` row is legitimate (a date may have a photo and no numbers), but it
+ * must not be shown or counted as a measurement in history or "latest" views.
+ */
+export function hasMeasurement(m: {
+  weight: number | null;
+  body_fat_pct: number | null;
+  muscle_pct: number | null;
+  circumferences?: object | null;
+}): boolean {
+  return (
+    m.weight !== null ||
+    m.body_fat_pct !== null ||
+    m.muscle_pct !== null ||
+    Object.keys(m.circumferences ?? {}).length > 0
+  );
+}
+
 type Range = { min: number; max: number };
 const WEIGHT: Range = { min: 20, max: 400 };
 const PERCENT: Range = { min: 1, max: 90 };
