@@ -107,7 +107,7 @@ export default async function CalendarPage({
       <div className="flex items-center justify-between">
         <Link
           href={`/calendar?m=${nextM}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="חודש הבא"
         >
           ‹
@@ -115,7 +115,7 @@ export default async function CalendarPage({
         <h1 className="text-lg font-bold">{monthLabel(year, month)}</h1>
         <Link
           href={`/calendar?m=${prevM}`}
-          className="rounded-lg border border-black/15 px-3 py-2"
+          className="rounded-sm border border-line px-3 py-2 hover:bg-surface-2"
           aria-label="חודש קודם"
         >
           ›
@@ -124,20 +124,20 @@ export default async function CalendarPage({
 
       {/* streak summary */}
       <div className="flex gap-3">
-        <div className="flex-1 rounded-xl border border-black/10 p-3 text-center">
-          <div className="text-2xl font-bold text-sky-600 tabular-nums">
+        <div className="flex-1 rounded-card border border-line bg-surface shadow-card p-3 text-center">
+          <div className="text-2xl font-bold text-water tabular-nums">
             {curWater}
           </div>
           <div className="text-xs opacity-60">רצף מים נוכחי</div>
         </div>
-        <div className="flex-1 rounded-xl border border-black/10 p-3 text-center">
+        <div className="flex-1 rounded-card border border-line bg-surface shadow-card p-3 text-center">
           <div className="text-2xl font-bold tabular-nums">{bestWater}</div>
           <div className="text-xs opacity-60">שיא רצף מים</div>
         </div>
       </div>
 
       {/* month grid */}
-      <div className="rounded-xl border border-black/10 p-3">
+      <div className="rounded-card border border-line bg-surface shadow-card p-3">
         <div className="grid grid-cols-7 gap-1">
           {DOW_SHORT.map((d) => (
             <div key={d} className="pb-1 text-center text-xs opacity-60">
@@ -155,18 +155,18 @@ export default async function CalendarPage({
               <Link
                 key={cell.date}
                 href={`/me?d=${cell.date}`}
-                className={`flex min-h-14 flex-col gap-0.5 rounded-lg border p-1 ${
-                  isToday ? "border-2 border-black" : "border-black/10"
+                className={`flex min-h-14 flex-col gap-0.5 rounded-sm border p-1 ${
+                  isToday ? "border-2 border-brand" : "border-line"
                 } ${cell.inMonth ? "" : "opacity-35"}`}
               >
                 <span className="text-xs font-bold tabular-nums">{dayNum}</span>
                 <span className="flex flex-wrap gap-0.5 text-xs leading-none">
-                  {waterOk && <span className="text-sky-600">●</span>}
+                  {waterOk && <span className="text-water">●</span>}
                   {wo && wo.done > 0 && (
-                    <span className="text-emerald-600">✓</span>
+                    <span className="text-good">✓</span>
                   )}
                   {wo && wo.done === 0 && wo.planned > 0 && (
-                    <span className="text-orange-500 opacity-80">○</span>
+                    <span className="text-warning opacity-80">○</span>
                   )}
                   {hasJournal && <span className="opacity-50">✎</span>}
                 </span>
@@ -176,10 +176,10 @@ export default async function CalendarPage({
         </div>
         <div className="mt-2 flex flex-wrap gap-3 text-xs opacity-60">
           <span>
-            <span className="text-sky-600">●</span> מים
+            <span className="text-water">●</span> מים
           </span>
           <span>
-            <span className="text-emerald-600">✓</span> אימון בוצע
+            <span className="text-good">✓</span> אימון בוצע
           </span>
           <span>○ אימון מתוכנן</span>
           <span>✎ יומן</span>
@@ -187,7 +187,7 @@ export default async function CalendarPage({
       </div>
 
       {/* medals */}
-      <div className="rounded-xl border border-black/10 p-4">
+      <div className="rounded-card border border-line bg-surface shadow-card p-4">
         <h2 className="font-bold">מדליות רצף מים</h2>
         <div className="mt-3 flex gap-3">
           {MEDAL_MILESTONES.map((m) => {
@@ -197,8 +197,8 @@ export default async function CalendarPage({
                 <span
                   className={`grid h-11 w-11 place-items-center rounded-full border-2 text-sm font-bold ${
                     on
-                      ? "border-amber-500 bg-amber-100 text-amber-800"
-                      : "border-dashed border-black/20 opacity-50"
+                      ? "border-transparent bg-gold text-ink"
+                      : "border-dashed border-line opacity-50"
                   }`}
                 >
                   {m}

@@ -28,12 +28,14 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 p-6">
       <header className="text-center">
-        <h1 className="text-2xl font-bold">Elasticoach</h1>
-        <p className="mt-1 text-sm opacity-70">ליווי תזונה ואימון</p>
+        <h1 className="bg-[image:var(--brand-grad)] bg-clip-text text-2xl font-bold text-transparent">
+          Elasticoach
+        </h1>
+        <p className="mt-1 text-sm text-ink-soft">ליווי תזונה ואימון</p>
       </header>
 
       {sent ? (
-        <p className="rounded-lg bg-green-50 p-4 text-center text-sm text-green-800">
+        <p className="rounded-sm border border-good bg-good/10 p-4 text-center text-sm">
           שלחנו קישור כניסה למייל <strong>{email}</strong>. בדקו את תיבת הדואר
           והיכנסו דרך הקישור.
         </p>
@@ -48,17 +50,17 @@ export default function LoginPage() {
               dir="ltr"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="rounded-lg border border-black/15 p-3 text-start"
+              className="rounded-sm border border-line bg-surface p-3 text-start"
               placeholder="you@example.com"
             />
           </label>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="rounded-lg bg-black p-3 font-medium text-white disabled:opacity-50"
+            className="btn-brand p-3"
           >
             {loading ? "שולח..." : "שליחת קישור כניסה"}
           </button>
